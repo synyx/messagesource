@@ -1,0 +1,11 @@
+   
+   
+    <bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+		<property name="basename" value="myproject"/>
+		<property name="defaultLocale" value="de_DE"/>
+		<property name="messageProvider" ref="jdbcMessageProvider"/>
+	</bean>
+	
+	<bean id="jdbcMessageProvider" class="org.synyx.messagesource.jdbc.JdbcMessageProvider">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>

@@ -32,21 +32,16 @@ public class JdbcMessageProvider implements MessageProvider {
     public Map<Locale, Map<String, String>> getMessages(String basename) {
 
         String query =
-                String.format("select %s,%s,%s,%s,%s from %s where %s = %s",
-                        languageColumn, countryColumn, variantColumn,
-                        keyColumn, messageColumn, tableName, basenameColumn,
-                        basename);
+                String.format("select %s,%s,%s,%s,%s from %s where %s = '%s'", languageColumn, countryColumn,
+                        variantColumn, keyColumn, messageColumn, tableName, basenameColumn, basename);
         return template.query(query, extractor);
     }
 
-    class MessageExtractor implements
-            ResultSetExtractor<Map<Locale, Map<String, String>>> {
+    class MessageExtractor implements ResultSetExtractor<Map<Locale, Map<String, String>>> {
 
-        public Map<Locale, Map<String, String>> extractData(ResultSet rs)
-                throws SQLException, DataAccessException {
+        public Map<Locale, Map<String, String>> extractData(ResultSet rs) throws SQLException, DataAccessException {
 
-            Map<Locale, Map<String, String>> map =
-                    new HashMap<Locale, Map<String, String>>();
+            Map<Locale, Map<String, String>> map = new HashMap<Locale, Map<String, String>>();
 
             while (rs.next()) {
                 String language = rs.getString(languageColumn);
@@ -63,16 +58,23 @@ public class JdbcMessageProvider implements MessageProvider {
         }
 
 
-        protected Locale toLocale(String language, String country,
-                String variant) {
+        protected Locale toLocale(String language, String country, String variant) {
 
+            if (variant == null) {
+                if (country == null) {
+                    if (language == null) {
+                        return null;
+                    }
+                    return new Locale(language);
+                }
+                return new Locale(language, country);
+            }
             return new Locale(language, country, variant);
 
         }
 
 
-        private void addToMap(Locale locale, String key, String message,
-                Map<Locale, Map<String, String>> map) {
+        private void addToMap(Locale locale, String key, String message, Map<Locale, Map<String, String>> map) {
 
             Map<String, String> keyToMessage = map.get(locale);
             if (keyToMessage == null) {

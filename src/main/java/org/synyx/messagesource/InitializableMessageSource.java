@@ -6,44 +6,61 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 import org.springframework.beans.propertyeditors.LocaleEditor;
+import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
 
 
+/**
+ * {@link MessageSource} implementation that is able to initialize itself using a {@link MessageProvider}. This
+ * {@link MessageSource} is initializable using the initialize()-method. If this is called it uses the set
+ * {@link MessageProvider} to retrieve all Messages for the set basename at once. This class caches messages and
+ * resolving-paths and uses the resolving-strategy also the default {@link ResourceBundle} does. When resolving a
+ * message the keys are tried to resolve in the following order:
+ * <ul>
+ * <li>given {@link Locale}s language + country + variant</li>
+ * <li>given {@link Locale}s language + country</li>
+ * <li>given {@link Locale}s language</li>
+ * <li>VM-wide default {@link Locale}s language + country + variant</li>
+ * <li>VM-wide default {@link Locale}s language + country</li>
+ * <li>VM-wide default {@link Locale}s language</li>
+ * <li>Default (basename)</li>
+ * </ul>
+ * 
+ * @author Marc Kannegiesser - kannegiesser@synyx.de
+ */
 public class InitializableMessageSource extends AbstractMessageSource {
 
-    protected Map<Locale, List<String>> resolvingPath =
-            new HashMap<Locale, List<String>>();
+    protected Map<Locale, List<String>> resolvingPath = new HashMap<Locale, List<String>>();
     protected Map<String, Map<String, MessageFormat>> messages;
     protected Locale defaultLocale = Locale.getDefault();
 
     protected MessageProvider messageProvider;
-    private String basename = "message";
+    protected String basename = "message";
 
 
+    /**
+     * Initializes messages by retrieving them from the set {@link MessageProvider}
+     */
     public void initialize() {
 
         messages = new HashMap<String, Map<String, MessageFormat>>();
 
-        Map<Locale, Map<String, String>> localeToCodeToMessage =
-                messageProvider.getMessages(basename);
+        Map<Locale, Map<String, String>> localeToCodeToMessage = messageProvider.getMessages(basename);
         for (Locale locale : localeToCodeToMessage.keySet()) {
-            Map<String, String> codeToMessage =
-                    localeToCodeToMessage.get(locale);
+            Map<String, String> codeToMessage = localeToCodeToMessage.get(locale);
             for (String code : codeToMessage.keySet()) {
-                addMessage(locale, code, createMessageFormat(codeToMessage
-                        .get(code), locale));
+                addMessage(locale, code, createMessageFormat(codeToMessage.get(code), locale));
             }
         }
     }
 
 
-    private void addMessage(Locale locale, String code,
-            MessageFormat messageFormat) {
+    private void addMessage(Locale locale, String code, MessageFormat messageFormat) {
 
-        String localeString =
-                basename + "_" + (locale != null ? locale.toString() : "");
+        String localeString = basename + "_" + (locale != null ? locale.toString() : "");
         Map<String, MessageFormat> codeMap = messages.get(localeString);
         if (codeMap == null) {
             codeMap = new HashMap<String, MessageFormat>();
@@ -63,6 +80,11 @@ public class InitializableMessageSource extends AbstractMessageSource {
     }
 
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.springframework.context.support.AbstractMessageSource#resolveCode(java.lang.String, java.util.Locale)
+     */
     @Override
     protected MessageFormat resolveCode(String code, Locale locale) {
 
@@ -90,13 +112,10 @@ public class InitializableMessageSource extends AbstractMessageSource {
             String country = locale.getCountry();
             String variant = locale.getVariant();
             if (!variant.isEmpty()) {
-                path.add(String.format("%s_%s_%s_%s", basename, language,
-                        country, variant));
+                path.add(String.format("%s_%s_%s_%s", basename, language, country, variant));
             }
             if (!country.isEmpty()) {
-                path
-                        .add(String.format("%s_%s_%s", basename, language,
-                                country));
+                path.add(String.format("%s_%s_%s", basename, language, country));
             }
             if (!language.isEmpty()) {
                 path.add(String.format("%s_%s", basename, language));
@@ -108,6 +127,7 @@ public class InitializableMessageSource extends AbstractMessageSource {
             }
 
         }
+        resolvingPath.put(locale, path);
         return path;
     }
 
@@ -124,21 +144,9 @@ public class InitializableMessageSource extends AbstractMessageSource {
     }
 
 
-    public MessageProvider getMessageProvider() {
-
-        return messageProvider;
-    }
-
-
     public void setMessageProvider(MessageProvider messageProvider) {
 
         this.messageProvider = messageProvider;
-    }
-
-
-    public String getBasename() {
-
-        return basename;
     }
 
 

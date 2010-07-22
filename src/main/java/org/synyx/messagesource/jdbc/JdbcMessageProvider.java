@@ -1,20 +1,25 @@
 package org.synyx.messagesource.jdbc;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.synyx.messagesource.MessageAcceptor;
 import org.synyx.messagesource.MessageProvider;
+import org.synyx.messagesource.Messages;
+import org.synyx.messagesource.util.LocaleUtils;
 
 
-public class JdbcMessageProvider implements MessageProvider {
+public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
 
     private JdbcTemplate template;
 
@@ -29,61 +34,87 @@ public class JdbcMessageProvider implements MessageProvider {
     private final MessageExtractor extractor = new MessageExtractor();
 
 
-    public Map<Locale, Map<String, String>> getMessages(String basename) {
+    public Messages getMessages(String basename) {
 
         String query =
-                String.format("select %s,%s,%s,%s,%s from %s where %s = '%s'", languageColumn, countryColumn,
-                        variantColumn, keyColumn, messageColumn, tableName, basenameColumn, basename);
+                String.format("select `%s`,`%s`,`%s`,`%s`,`%s` from `%s` where %s = '%s'", languageColumn,
+                        countryColumn, variantColumn, keyColumn, messageColumn, tableName, basenameColumn, basename);
         return template.query(query, extractor);
     }
 
-    class MessageExtractor implements ResultSetExtractor<Map<Locale, Map<String, String>>> {
 
-        public Map<Locale, Map<String, String>> extractData(ResultSet rs) throws SQLException, DataAccessException {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.synyx.messagesource.MessageAcceptor#setMessages(java.lang.String, org.synyx.messagesource.Messages)
+     */
+    public void setMessages(String basename, Messages messages) {
 
-            Map<Locale, Map<String, String>> map = new HashMap<Locale, Map<String, String>>();
+        deleteMessages(basename);
 
-            while (rs.next()) {
-                String language = rs.getString(languageColumn);
-                String country = rs.getString(countryColumn);
-                String variant = rs.getString(variantColumn);
-                String key = rs.getString(keyColumn);
-                String message = rs.getString(messageColumn);
+        String query =
+                String.format("insert into `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                        tableName, basenameColumn, languageColumn, countryColumn, variantColumn, keyColumn,
+                        messageColumn);
 
-                Locale locale = toLocale(language, country, variant);
-                addToMap(locale, key, message, map);
+        for (Locale locale : messages.getLocales()) {
+            String language = null;
+            String country = null;
+            String variant = null;
+            if (locale != null) {
+                language = locale.getLanguage();
+                country = locale.getCountry();
+                variant = locale.getVariant();
             }
 
-            return map;
-        }
-
-
-        protected Locale toLocale(String language, String country, String variant) {
-
-            if (variant == null) {
-                if (country == null) {
-                    if (language == null) {
-                        return null;
-                    }
-                    return new Locale(language);
-                }
-                return new Locale(language, country);
-            }
-            return new Locale(language, country, variant);
+            insert(query, basename, language, country, variant, messages.getMessages(locale));
 
         }
 
+    }
 
-        private void addToMap(Locale locale, String key, String message, Map<Locale, Map<String, String>> map) {
 
-            Map<String, String> keyToMessage = map.get(locale);
-            if (keyToMessage == null) {
-                keyToMessage = new HashMap<String, String>();
-                map.put(locale, keyToMessage);
+    /**
+     * @param basename
+     * @param language
+     * @param country
+     * @param variant
+     * @param key
+     * @param message
+     */
+    private void insert(String query, final String basename, final String language, final String country,
+            final String variant, final Map<String, String> messages) {
+
+        final Iterator<Map.Entry<String, String>> messagesIterator = messages.entrySet().iterator();
+
+        template.batchUpdate(query, new BatchPreparedStatementSetter() {
+
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+
+                Map.Entry<String, String> entry = messagesIterator.next();
+
+                ps.setString(1, basename);
+                ps.setString(2, language);
+                ps.setString(3, country);
+                ps.setString(4, variant);
+                ps.setString(5, entry.getKey());
+                ps.setString(6, entry.getValue());
+
             }
-            keyToMessage.put(key, message);
 
-        }
+
+            public int getBatchSize() {
+
+                return messages.size();
+            }
+        });
+
+    }
+
+
+    private void deleteMessages(String basename) {
+
+        template.execute(String.format("delete from `%s` where `%s` = '%s'", tableName, basenameColumn, basename));
     }
 
 
@@ -162,6 +193,28 @@ public class JdbcMessageProvider implements MessageProvider {
     public void setDataSource(DataSource dataSource) {
 
         this.template = new JdbcTemplate(dataSource);
+    }
+
+    class MessageExtractor implements ResultSetExtractor<Messages> {
+
+        public Messages extractData(ResultSet rs) throws SQLException, DataAccessException {
+
+            Messages messages = new Messages();
+
+            while (rs.next()) {
+                String language = rs.getString(languageColumn);
+                String country = rs.getString(countryColumn);
+                String variant = rs.getString(variantColumn);
+                String key = rs.getString(keyColumn);
+                String message = rs.getString(messageColumn);
+
+                Locale locale = LocaleUtils.toLocale(language, country, variant);
+                messages.addMessage(locale, key, message);
+            }
+
+            return messages;
+        }
+
     }
 
 }

@@ -2,7 +2,6 @@ package org.synyx.messagesource.jdbc;
 
 import java.sql.SQLException;
 import java.util.Locale;
-import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -11,6 +10,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.synyx.messagesource.Messages;
+import org.synyx.messagesource.util.LocaleUtils;
 
 
 public class JdbcMessageProviderUnitTest {
@@ -104,33 +105,16 @@ public class JdbcMessageProviderUnitTest {
     }
 
 
-    protected Locale toLocale(String language, String country, String variant) {
-
-        if (variant == null) {
-            if (country == null) {
-                if (language == null) {
-                    return null;
-                }
-                return new Locale(language);
-            }
-            return new Locale(language, country);
-        }
-        return new Locale(language, country, variant);
-
-    }
-
-
     private void assertMessage(String lang, String country, String variant, String key, String message) {
 
-        Map<Locale, Map<String, String>> allMessages = provider.getMessages("base");
+        Messages allMessages = provider.getMessages("base");
 
-        Locale locale = toLocale(lang, country, variant);
+        Locale locale = LocaleUtils.toLocale(lang, country, variant);
 
-        Assert.assertTrue(allMessages.containsKey(locale));
-        Map<String, String> messages = allMessages.get(locale);
+        String returnedMessage = allMessages.getMessage(locale, key);
 
-        Assert.assertTrue(messages.containsKey(key));
-        Assert.assertTrue(message.equals(messages.get(key)));
+        Assert.assertNotNull(returnedMessage);
+        Assert.assertTrue(message.equals(returnedMessage));
 
     }
 

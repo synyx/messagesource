@@ -1,8 +1,6 @@
 package org.synyx.messagesource;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -17,7 +15,7 @@ public class InitializableMessageSourceUnitTest {
 
     private MessageProvider messageProvider;
 
-    Map<Locale, Map<String, String>> messages;
+    private Messages messages;
 
     InitializableMessageSource messageSource;
 
@@ -29,13 +27,12 @@ public class InitializableMessageSourceUnitTest {
 
         defaultLocale = new Locale("de", "DE");
 
-        messages = new HashMap<Locale, Map<String, String>>();
+        messages = new Messages();
         messageSource = new InitializableMessageSource();
         messageSource.setDefaultLocale(defaultLocale);
         messageSource.setBasename(basename);
         messageProvider = Mockito.mock(MessageProvider.class);
-        Mockito.when(messageProvider.getMessages(basename))
-                .thenReturn(messages);
+        Mockito.when(messageProvider.getMessages(basename)).thenReturn(messages);
         messageSource.setMessageProvider(messageProvider);
 
     }
@@ -52,10 +49,9 @@ public class InitializableMessageSourceUnitTest {
     @Test
     public void resolvesMessage() {
 
-        addMessage(Locale.GERMAN, "foo", "bar");
+        messages.addMessage(Locale.GERMAN, "foo", "bar");
         messageSource.initialize();
-        String resolved =
-                messageSource.getMessage("foo", new Object[] {}, Locale.GERMAN);
+        String resolved = messageSource.getMessage("foo", new Object[] {}, Locale.GERMAN);
         Assert.assertEquals("bar", resolved);
     }
 
@@ -63,11 +59,9 @@ public class InitializableMessageSourceUnitTest {
     @Test
     public void resolvesMessageCascade() {
 
-        addMessage(new Locale("en"), "foo", "bar");
+        messages.addMessage(new Locale("en"), "foo", "bar");
         messageSource.initialize();
-        String resolved =
-                messageSource.getMessage("foo", new Object[] {}, new Locale(
-                        "en", "GB", "foo"));
+        String resolved = messageSource.getMessage("foo", new Object[] {}, new Locale("en", "GB", "foo"));
         Assert.assertEquals("bar", resolved);
     }
 
@@ -75,11 +69,9 @@ public class InitializableMessageSourceUnitTest {
     @Test
     public void resolvesMessageCascadeToDefault() {
 
-        addMessage(defaultLocale, "foo", "bar");
+        messages.addMessage(defaultLocale, "foo", "bar");
         messageSource.initialize();
-        String resolved =
-                messageSource.getMessage("foo", new Object[] {}, new Locale(
-                        "en", "GB", "foo"));
+        String resolved = messageSource.getMessage("foo", new Object[] {}, new Locale("en", "GB", "foo"));
         Assert.assertEquals("bar", resolved);
     }
 
@@ -87,23 +79,10 @@ public class InitializableMessageSourceUnitTest {
     @Test
     public void resolvesMessageCascadeToBase() {
 
-        addMessage(null, "foo", "bar");
+        messages.addMessage(null, "foo", "bar");
         messageSource.initialize();
-        String resolved =
-                messageSource.getMessage("foo", new Object[] {}, new Locale(
-                        "en", "GB", "foo"));
+        String resolved = messageSource.getMessage("foo", new Object[] {}, new Locale("en", "GB", "foo"));
         Assert.assertEquals("bar", resolved);
     }
 
-
-    private void addMessage(Locale locale, String key, String value) {
-
-        Map<String, String> map = messages.get(locale);
-        if (map == null) {
-            map = new HashMap<String, String>();
-            messages.put(locale, map);
-        }
-        map.put(key, value);
-
-    }
 }

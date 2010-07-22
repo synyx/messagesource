@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.springframework.beans.propertyeditors.LocaleEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
 
@@ -48,9 +47,9 @@ public class InitializableMessageSource extends AbstractMessageSource {
 
         messages = new HashMap<String, Map<String, MessageFormat>>();
 
-        Map<Locale, Map<String, String>> localeToCodeToMessage = messageProvider.getMessages(basename);
-        for (Locale locale : localeToCodeToMessage.keySet()) {
-            Map<String, String> codeToMessage = localeToCodeToMessage.get(locale);
+        Messages messages = messageProvider.getMessages(basename);
+        for (Locale locale : messages.getLocales()) {
+            Map<String, String> codeToMessage = messages.getMessages(locale);
             for (String code : codeToMessage.keySet()) {
                 addMessage(locale, code, createMessageFormat(codeToMessage.get(code), locale));
             }
@@ -68,15 +67,6 @@ public class InitializableMessageSource extends AbstractMessageSource {
         }
 
         codeMap.put(code, messageFormat);
-    }
-
-
-    protected Locale toLocale(String locale) {
-
-        LocaleEditor led = new LocaleEditor();
-        led.setAsText(locale);
-        return (Locale) led.getValue();
-
     }
 
 

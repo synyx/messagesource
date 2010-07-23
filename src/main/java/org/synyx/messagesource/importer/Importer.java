@@ -86,4 +86,15 @@ public class Importer {
         }
 
     }
+
+
+    public void importMessages() {
+
+        for (String basename : source.getAvailableBaseNames()) {
+            importMessages(basename);
+        }
+
+        // TODO think about basenames that exist in target but not in source
+
+    }
 }

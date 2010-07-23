@@ -6,6 +6,7 @@ package org.synyx.messagesource.util;
 import java.util.Locale;
 
 import org.springframework.beans.propertyeditors.LocaleEditor;
+import org.springframework.util.StringUtils;
 
 
 /**
@@ -57,5 +58,59 @@ public class LocaleUtils {
      */
     private LocaleUtils() {
 
-    };
+    }
+
+
+    /**
+     * @param locale
+     * @return
+     */
+    public static String getLanguage(Locale locale) {
+
+        if (locale != null && StringUtils.hasLength(locale.getLanguage())) {
+            return locale.getLanguage();
+        }
+        return "";
+    }
+
+
+    /**
+     * @param locale
+     * @return
+     */
+    public static String getCountry(Locale locale) {
+
+        if (locale != null && StringUtils.hasLength(locale.getCountry())) {
+            return locale.getCountry();
+        }
+        return "";
+    }
+
+
+    /**
+     * @param locale
+     * @return
+     */
+    public static String getVariant(Locale locale) {
+
+        if (locale != null && StringUtils.hasLength(locale.getVariant())) {
+            return locale.getVariant();
+        }
+        return "";
+    }
+
+
+    public static Locale getParent(Locale locale) {
+
+        if (locale == null) {
+            return null;
+        }
+        if (StringUtils.hasLength(locale.getVariant())) {
+            return new Locale(locale.getLanguage(), locale.getCountry());
+        } else if (StringUtils.hasLength(locale.getCountry())) {
+            return new Locale(locale.getLanguage());
+        } else {
+            return null;
+        }
+    }
 }

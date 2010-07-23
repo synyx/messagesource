@@ -8,12 +8,15 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.synyx.messagesource.MessageProvider;
 import org.synyx.messagesource.Messages;
@@ -164,6 +167,49 @@ public class FileSystemMessageProvider implements MessageProvider {
 
             return name.startsWith(basename) && name.endsWith(".properties");
         }
+    }
+
+    private static class ExtensionFilter implements FilenameFilter {
+
+        private String extension;
+
+
+        public ExtensionFilter(String extension) {
+
+            this.extension = extension;
+        }
+
+
+        public boolean accept(File dir, String name) {
+
+            return name.endsWith("." + extension);
+        }
+    }
+
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.synyx.messagesource.MessageProvider#getAvailableBaseNames()
+     */
+    public Collection<String> getAvailableBaseNames() {
+
+        File[] files = baseDir.listFiles(new ExtensionFilter("properties"));
+
+        Set<String> basenames = new HashSet<String>();
+        for (File file : files) {
+            String fileName = file.getName();
+            if (fileName.contains("_")) {
+                int underscorePos = fileName.indexOf("_");
+                fileName = fileName.substring(0, underscorePos);
+            } else {
+                int dotPos = fileName.indexOf(".");
+                fileName = fileName.substring(0, dotPos);
+            }
+            basenames.add(fileName);
+        }
+
+        return basenames;
     };
 
 }

@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -53,21 +54,14 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
         deleteMessages(basename);
 
         String query =
-                String.format("insert into `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                String.format("insert into `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)",
                         tableName, basenameColumn, languageColumn, countryColumn, variantColumn, keyColumn,
                         messageColumn);
 
         for (Locale locale : messages.getLocales()) {
-            String language = null;
-            String country = null;
-            String variant = null;
-            if (locale != null) {
-                language = locale.getLanguage();
-                country = locale.getCountry();
-                variant = locale.getVariant();
-            }
 
-            insert(query, basename, language, country, variant, messages.getMessages(locale));
+            insert(query, basename, LocaleUtils.getLanguage(locale), LocaleUtils.getCountry(locale), LocaleUtils
+                    .getVariant(locale), messages.getMessages(locale));
 
         }
 
@@ -92,7 +86,6 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
             public void setValues(PreparedStatement ps, int i) throws SQLException {
 
                 Map.Entry<String, String> entry = messagesIterator.next();
-
                 ps.setString(1, basename);
                 ps.setString(2, language);
                 ps.setString(3, country);
@@ -215,6 +208,20 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
             return messages;
         }
 
+    }
+
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.synyx.messagesource.MessageProvider#getAvailableBaseNames()
+     */
+    public List<String> getAvailableBaseNames() {
+
+        List<String> basenames =
+                template.queryForList(String.format("select distinct `%s` from `%s`", basenameColumn, tableName),
+                        String.class);
+        return basenames;
     }
 
 }

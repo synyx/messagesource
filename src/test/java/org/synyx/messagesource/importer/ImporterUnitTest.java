@@ -9,7 +9,9 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -148,6 +150,17 @@ public class ImporterUnitTest {
         public Messages getMessages(String basename) {
 
             return messageMap.get(basename);
+        }
+
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.synyx.messagesource.MessageProvider#getAvailableBaseNames()
+         */
+        public List<String> getAvailableBaseNames() {
+
+            return new ArrayList<String>(messageMap.keySet());
         }
 
     }

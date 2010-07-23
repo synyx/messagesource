@@ -17,14 +17,6 @@
 
     <developers>
         <developer>
-            <id>gierke</id>
-            <name>Oliver Gierke</name>
-            <email>gierke@synyx.de</email>
-            <roles>
-                <role>Developer</role>
-            </roles>
-        </developer>
-        <developer>
             <id>kannegiesser</id>
             <name>Marc Kannegießer</name>
             <email>kannegiesser@synyx.de</email>

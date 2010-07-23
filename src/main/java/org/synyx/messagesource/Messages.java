@@ -83,4 +83,43 @@ public class Messages {
         return localeMessages.get(key);
     }
 
+
+    @Override
+    public String toString() {
+
+        StringBuffer buffer = new StringBuffer();
+        for (Locale locale : getLocales()) {
+            String localeString = locale == null ? "default (base)" : locale.toString();
+            buffer.append(String.format("%d messages for locale %s\n", getMessages(locale).size(), localeString));
+        }
+        return buffer.toString();
+
+    }
+
+
+    public String getFullInfo() {
+
+        StringBuffer buffer = new StringBuffer();
+
+        for (Locale locale : getLocales()) {
+            String localeString = locale == null ? "default (base)" : locale.toString();
+            buffer.append("Messages for locale " + localeString + "\n");
+
+            buffer.append("====================================================================================\n");
+
+            for (Map.Entry<String, String> msg : getMessages(locale).entrySet()) {
+                String value = msg.getValue();
+                if (value.contains("\n")) {
+                    value = value.replace("\n", "\n  ");
+                }
+                buffer.append(String.format("%s=%s\n", msg.getKey(), value));
+
+            }
+            buffer.append("\n\n");
+        }
+
+        return buffer.toString();
+
+    }
+
 }

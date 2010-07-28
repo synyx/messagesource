@@ -4,23 +4,15 @@
 package org.synyx.messagesource.filesystem;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.synyx.messagesource.MessageProvider;
 import org.synyx.messagesource.Messages;
-import org.synyx.messagesource.util.LocaleUtils;
 
 
 /**
@@ -87,105 +79,6 @@ public class FileSystemMessageProvider implements MessageProvider {
         return bundles;
     }
 
-    private static class BundleInfo {
-
-        public BundleInfo(File file, String basename) {
-
-            this.file = file;
-
-            int prefixLength = basename.length();
-            int postfixLength = ".properties".length();
-
-            String fileName = file.getName();
-            String localeString = fileName.substring(prefixLength, fileName.length() - postfixLength);
-
-            locale = LocaleUtils.toLocale(localeString);
-            // TODO Auto-generated constructor stub
-        }
-
-
-        /**
-         * @return
-         */
-        public Map<String, String> getMessages() {
-
-            Properties properties = loadProperties(file);
-            Map<String, String> messages = new HashMap<String, String>(properties.size());
-
-            Enumeration<Object> keys = properties.keys();
-            while (keys.hasMoreElements()) {
-                String key = (String) keys.nextElement();
-                String value = (String) properties.getProperty(key);
-                messages.put(key, value);
-            }
-
-            return messages;
-        }
-
-
-        /**
-         * Loads {@link Properties} from the given {@link File} while handling errors.
-         */
-        private Properties loadProperties(File file) {
-
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(file);
-                Properties properties = new Properties();
-                properties.load(fis);
-                return properties;
-            } catch (IOException e) {
-                throw new RuntimeException("Could not load messages from " + file + ": " + e.getMessage(), e);
-            } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        // intentionally left blank
-                    }
-                }
-            }
-
-        }
-
-        Locale locale;
-        File file;
-    }
-
-    private static class BundleFilter implements FilenameFilter {
-
-        private String basename;
-
-
-        public BundleFilter(String basename) {
-
-            this.basename = basename;
-        }
-
-
-        public boolean accept(File dir, String name) {
-
-            return name.startsWith(basename) && name.endsWith(".properties");
-        }
-    }
-
-    private static class ExtensionFilter implements FilenameFilter {
-
-        private String extension;
-
-
-        public ExtensionFilter(String extension) {
-
-            this.extension = extension;
-        }
-
-
-        public boolean accept(File dir, String name) {
-
-            return name.endsWith("." + extension);
-        }
-    }
-
 
     /*
      * (non-Javadoc)
@@ -210,6 +103,6 @@ public class FileSystemMessageProvider implements MessageProvider {
         }
 
         return basenames;
-    };
+    }
 
 }

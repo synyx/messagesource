@@ -28,7 +28,7 @@ public class LocaleUtils {
     public static String fromLocale(Locale locale) {
 
         if (locale == null) {
-            return null; // TODO check
+            return null;
         }
         LocaleEditor led = new LocaleEditor();
         led.setValue(locale);

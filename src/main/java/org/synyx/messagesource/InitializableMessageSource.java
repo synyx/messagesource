@@ -37,7 +37,9 @@ public class InitializableMessageSource extends AbstractMessageSource {
     protected Locale defaultLocale = Locale.getDefault();
 
     protected MessageProvider messageProvider;
-    protected String basename = "message";
+    protected List<String> basenames = new ArrayList<String>();
+
+    protected boolean basenameRestriction = false;
 
 
     /**
@@ -45,19 +47,33 @@ public class InitializableMessageSource extends AbstractMessageSource {
      */
     public void initialize() {
 
+        if (!basenameRestriction) {
+            basenames = new ArrayList<String>();
+            basenames.addAll(messageProvider.getAvailableBaseNames());
+
+        }
+
+        for (String basename : basenames) {
+            initialize(basename);
+        }
+    }
+
+
+    protected void initialize(String basename) {
+
         messages = new HashMap<String, Map<String, MessageFormat>>();
 
         Messages messages = messageProvider.getMessages(basename);
         for (Locale locale : messages.getLocales()) {
             Map<String, String> codeToMessage = messages.getMessages(locale);
             for (String code : codeToMessage.keySet()) {
-                addMessage(locale, code, createMessageFormat(codeToMessage.get(code), locale));
+                addMessage(basename, locale, code, createMessageFormat(codeToMessage.get(code), locale));
             }
         }
     }
 
 
-    private void addMessage(Locale locale, String code, MessageFormat messageFormat) {
+    private void addMessage(String basename, Locale locale, String code, MessageFormat messageFormat) {
 
         String localeString = basename + "_" + (locale != null ? locale.toString() : "");
         Map<String, MessageFormat> codeMap = messages.get(localeString);
@@ -78,13 +94,15 @@ public class InitializableMessageSource extends AbstractMessageSource {
     @Override
     protected MessageFormat resolveCode(String code, Locale locale) {
 
-        List<String> paths = getPath(locale);
-        for (String loc : paths) {
-            Map<String, MessageFormat> formatMap = messages.get(loc);
-            if (formatMap != null) {
-                MessageFormat format = formatMap.get(code);
-                if (format != null) {
-                    return format;
+        for (String basename : basenames) {
+            List<String> paths = getPath(locale);
+            for (String loc : paths) {
+                Map<String, MessageFormat> formatMap = messages.get(basename + loc);
+                if (formatMap != null) {
+                    MessageFormat format = formatMap.get(code);
+                    if (format != null) {
+                        return format;
+                    }
                 }
             }
         }
@@ -102,22 +120,22 @@ public class InitializableMessageSource extends AbstractMessageSource {
             String country = locale.getCountry();
             String variant = locale.getVariant();
             if (!variant.isEmpty()) {
-                path.add(String.format("%s_%s_%s_%s", basename, language, country, variant));
+                path.add(String.format("_%s_%s_%s", language, country, variant));
             }
             if (!country.isEmpty()) {
-                path.add(String.format("%s_%s_%s", basename, language, country));
+                path.add(String.format("_%s_%s", language, country));
             }
             if (!language.isEmpty()) {
-                path.add(String.format("%s_%s", basename, language));
+                path.add(String.format("_%s", language));
             }
 
             if (locale != getDefaultLocale()) {
                 path.addAll(getPath(getDefaultLocale()));
-                path.add(basename + "_");
+                path.add("_");
             }
 
+            resolvingPath.put(locale, path);
         }
-        resolvingPath.put(locale, path);
         return path;
     }
 
@@ -142,7 +160,18 @@ public class InitializableMessageSource extends AbstractMessageSource {
 
     public void setBasename(String basename) {
 
-        this.basename = basename;
+        basenameRestriction = true;
+        this.basenames = new ArrayList<String>();
+        basenames.add(basename);
+    }
+
+
+    public void setBasenames(List<String> basenames) {
+
+        if (!basenames.isEmpty()) {
+            basenameRestriction = true;
+            this.basenames = basenames;
+        }
     }
 
 }

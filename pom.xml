@@ -27,6 +27,17 @@
         </developer>
     </developers>
 
+    <distributionManagement>
+        <repository>
+            <id>releases.public.nexus.synyx.de</id>
+            <url>http://nexus.synyx.de/content/repositories/public-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots.public.nexus.synyx.de</id>
+            <url>http://nexus.synyx.de/content/repositories/public-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 
  
     <properties>

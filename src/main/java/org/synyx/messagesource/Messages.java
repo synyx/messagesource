@@ -122,4 +122,16 @@ public class Messages {
 
     }
 
+
+    /**
+     * Returnsa true if the given key is defined within the given {@link Locale}.
+     * 
+     * @param object
+     * @return
+     */
+    public boolean hasMessage(Locale locale, String key) {
+
+        return getMessage(locale, key) != null;
+    }
+
 }

@@ -53,6 +53,7 @@ public class InitializableMessageSource extends AbstractMessageSource {
 
         }
 
+        messages = new HashMap<String, Map<String, MessageFormat>>();
         for (String basename : basenames) {
             initialize(basename);
         }
@@ -61,11 +62,9 @@ public class InitializableMessageSource extends AbstractMessageSource {
 
     protected void initialize(String basename) {
 
-        messages = new HashMap<String, Map<String, MessageFormat>>();
-
-        Messages messages = messageProvider.getMessages(basename);
-        for (Locale locale : messages.getLocales()) {
-            Map<String, String> codeToMessage = messages.getMessages(locale);
+        Messages messagesForBasename = messageProvider.getMessages(basename);
+        for (Locale locale : messagesForBasename.getLocales()) {
+            Map<String, String> codeToMessage = messagesForBasename.getMessages(locale);
             for (String code : codeToMessage.keySet()) {
                 addMessage(basename, locale, code, createMessageFormat(codeToMessage.get(code), locale));
             }

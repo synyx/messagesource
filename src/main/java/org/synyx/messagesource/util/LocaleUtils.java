@@ -121,13 +121,15 @@ public class LocaleUtils {
 
         List<Locale> path = new ArrayList<Locale>();
 
+        boolean localeWasNull = locale == null;
+
         // path down to only language (e.g. de_DE_POSIX -> de_DE -> de)
         while (locale != null) {
             path.add(locale);
             locale = getParent(locale);
         }
 
-        if (locale != defaultLocale) {
+        if (!localeWasNull && locale != defaultLocale) {
             // path of default locale down to only language (e.g. en_US -> en )
             while (defaultLocale != null) {
                 path.add(defaultLocale);

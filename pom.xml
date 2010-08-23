@@ -38,6 +38,11 @@
         </snapshotRepository>
     </distributionManagement>
 
+    <scm>
+        <url>http://svn.synyx.org/synyx/opensource/messagesource/trunk</url>
+        <connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/trunk</connection>
+        <developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/trunk</developerConnection>
+    </scm>
 
  
     <properties>

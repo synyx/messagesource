@@ -3,6 +3,8 @@
  */
 package org.synyx.messagesource.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.propertyeditors.LocaleEditor;
@@ -113,4 +115,30 @@ public class LocaleUtils {
             return null;
         }
     }
+
+
+    public static List<Locale> getPath(Locale locale, Locale defaultLocale) {
+
+        List<Locale> path = new ArrayList<Locale>();
+
+        // path down to only language (e.g. de_DE_POSIX -> de_DE -> de)
+        while (locale != null) {
+            path.add(locale);
+            locale = getParent(locale);
+        }
+
+        if (locale != defaultLocale) {
+            // path of default locale down to only language (e.g. en_US -> en )
+            while (defaultLocale != null) {
+                path.add(defaultLocale);
+                defaultLocale = getParent(defaultLocale);
+            }
+
+        }
+        // default locale
+        path.add(null);
+
+        return path;
+    }
+
 }

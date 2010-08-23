@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
+import org.synyx.messagesource.util.LocaleUtils;
 
 
 /**
@@ -115,22 +116,25 @@ public class InitializableMessageSource extends AbstractMessageSource {
         List<String> path = resolvingPath.get(locale);
         if (path == null) {
             path = new ArrayList<String>();
-            String language = locale.getLanguage();
-            String country = locale.getCountry();
-            String variant = locale.getVariant();
-            if (!variant.isEmpty()) {
-                path.add(String.format("_%s_%s_%s", language, country, variant));
-            }
-            if (!country.isEmpty()) {
-                path.add(String.format("_%s_%s", language, country));
-            }
-            if (!language.isEmpty()) {
-                path.add(String.format("_%s", language));
-            }
 
-            if (locale != getDefaultLocale()) {
-                path.addAll(getPath(getDefaultLocale()));
-                path.add("_");
+            List<Locale> localePath = LocaleUtils.getPath(locale, getDefaultLocale());
+            for (Locale loc : localePath) {
+                if (loc == null) {
+                    path.add("_");
+                } else {
+
+                    String language = LocaleUtils.getLanguage(loc);
+                    String country = LocaleUtils.getCountry(loc);
+                    String variant = LocaleUtils.getVariant(loc);
+                    if (!variant.isEmpty()) {
+                        path.add(String.format("_%s_%s_%s", language, country, variant));
+                    } else if (!country.isEmpty()) {
+                        path.add(String.format("_%s_%s", language, country));
+                    } else if (!language.isEmpty()) {
+                        path.add(String.format("_%s", language));
+                    }
+                }
+
             }
 
             resolvingPath.put(locale, path);

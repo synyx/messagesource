@@ -3,7 +3,7 @@
   <groupId>org.synyx</groupId>
   <artifactId>messagesource</artifactId>
   <name>MessageSource Support</name>
-  <version>0.3-SNAPSHOT</version>
+  <version>0.3</version>
   
      
     <licenses>
@@ -39,9 +39,9 @@
     </distributionManagement>
 
     <scm>
-        <url>http://svn.synyx.org/synyx/opensource/messagesource/trunk</url>
-        <connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/trunk</connection>
-        <developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/trunk</developerConnection>
+        <url>http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.3</url>
+        <connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.3</connection>
+        <developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/tags/messagesource-0.3</developerConnection>
     </scm>
 
  

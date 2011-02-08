@@ -23,9 +23,9 @@ import org.synyx.messagesource.util.LocaleUtils;
  * <li>given {@link Locale}s language + country + variant</li>
  * <li>given {@link Locale}s language + country</li>
  * <li>given {@link Locale}s language</li>
- * <li>VM-wide default {@link Locale}s language + country + variant</li>
- * <li>VM-wide default {@link Locale}s language + country</li>
- * <li>VM-wide default {@link Locale}s language</li>
+ * <li>default {@link Locale}s language + country + variant (property defaultLocale)</li> 
+ * <li>default {@link Locale}s language + country (property defaultLocale)</li>
+ * <li>default {@link Locale}s language (property defaultLocale)</li>
  * <li>Default (basename)</li>
  * </ul>
  * 
@@ -35,7 +35,7 @@ public class InitializableMessageSource extends AbstractMessageSource {
 
     protected Map<Locale, List<String>> resolvingPath = new HashMap<Locale, List<String>>();
     protected Map<String, Map<String, MessageFormat>> messages;
-    protected Locale defaultLocale = Locale.getDefault();
+    protected Locale defaultLocale;
 
     protected MessageProvider messageProvider;
     protected List<String> basenames = new ArrayList<String>();
@@ -110,6 +110,7 @@ public class InitializableMessageSource extends AbstractMessageSource {
         return null;
     }
 
+    
 
     private List<String> getPath(Locale locale) {
 

@@ -22,6 +22,9 @@ import org.synyx.messagesource.util.LocaleUtils;
 
 
 /**
+ * {@link MessageProvider} for messages read from a directory. This acts also as a {@link MessageAcceptor} that can
+ * write files to the given directory.
+ * 
  * @author Marc Kannegiesser - kannegiesser@synyx.de
  */
 public class FileSystemMessageProvider implements MessageProvider, MessageAcceptor {
@@ -29,6 +32,11 @@ public class FileSystemMessageProvider implements MessageProvider, MessageAccept
     private File baseDir;
 
 
+    /**
+     * Creates a new instance reading from the path represented by the given {@link String}.
+     * 
+     * @param basePath the path to the directory to read from
+     */
     public FileSystemMessageProvider(String basePath) {
 
         this(new File(basePath));
@@ -36,6 +44,11 @@ public class FileSystemMessageProvider implements MessageProvider, MessageAccept
     }
 
 
+    /**
+     * Creates a new instance reading from the path represented by the given {@link File}.
+     * 
+     * @param baseDir the path to the directory to read from
+     */
     public FileSystemMessageProvider(File baseDir) {
 
         super();
@@ -70,6 +83,8 @@ public class FileSystemMessageProvider implements MessageProvider, MessageAccept
 
 
     /**
+     * Returns {@link BundleInfo}s for all files in the directory matching the given basename
+     * 
      * @param basename
      * @return
      */
@@ -158,7 +173,11 @@ public class FileSystemMessageProvider implements MessageProvider, MessageAccept
 
 
     /**
+     * Returns a (maybe not existing) file for the given basename and {@link Locale}.
+     * 
+     * @param basename
      * @param locale
+     * @return
      */
     private File getFileFor(String basename, Locale locale) {
 

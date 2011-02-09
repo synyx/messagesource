@@ -11,6 +11,8 @@ import org.synyx.messagesource.filesystem.FileSystemMessageProvider;
 
 
 /**
+ * Helper-Class that is able to import messages from a {@link MessageProvider} to a {@link MessageAcceptor}.
+ * 
  * @author Marc Kannegiesser - kannegiesser@synyx.de
  */
 public class Importer {

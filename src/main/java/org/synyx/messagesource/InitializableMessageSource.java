@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.util.Assert;
@@ -44,7 +45,7 @@ import org.synyx.messagesource.util.LocaleUtils;
  * 
  * @author Marc Kannegiesser - kannegiesser@synyx.de
  */
-public class InitializableMessageSource extends AbstractMessageSource {
+public class InitializableMessageSource extends AbstractMessageSource implements InitializingBean {
 
     protected Map<Locale, List<String>> resolvingPath = new HashMap<Locale, List<String>>();
     protected Map<String, Map<String, MessageFormat>> messages;
@@ -52,6 +53,11 @@ public class InitializableMessageSource extends AbstractMessageSource {
 
     protected MessageProvider messageProvider;
     protected List<String> basenames = new ArrayList<String>();
+
+    /**
+     * If this property is set to true this initializes post-construction (spring lifecycle interface)
+     */
+    protected boolean initializeOnPostconstruct = true;
 
     /**
      * Property that indicates if all basenames returned from the {@link MessageProvider} should be used (=false) or the
@@ -231,6 +237,18 @@ public class InitializableMessageSource extends AbstractMessageSource {
             basenameRestriction = true;
             this.basenames = basenames;
         }
+    }
+
+
+    /**
+     * Callback to call {@link #initialize()} after construction of this using a Spring-Callback
+     */
+    public void afterPropertiesSet() throws Exception {
+
+        if (initializeOnPostconstruct) {
+            initialize();
+        }
+
     }
 
 }

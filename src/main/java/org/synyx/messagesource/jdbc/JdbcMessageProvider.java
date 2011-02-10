@@ -29,6 +29,12 @@ import org.synyx.messagesource.util.LocaleUtils;
  */
 public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
 
+    private static final String QUERY_INSERT =
+            "INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String QUERY_DELETE = "DELETE FROM `%s` WHERE `%s` = ?";
+    private static final String QUERY_SELECT_BASENAMES = "SELECT DISTINCT `%s` from `%s`";
+    private static final String QUERY_SELECT_MESSAGES = "SELECT `%s`,`%s`,`%s`,`%s`,`%s` FROM `%s` WHERE %s = ?";
+
     private JdbcTemplate template;
 
     private String languageColumn = "language";
@@ -50,9 +56,10 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     public Messages getMessages(String basename) {
 
         String query =
-                String.format("select `%s`,`%s`,`%s`,`%s`,`%s` from `%s` where %s = '%s'", languageColumn,
-                        countryColumn, variantColumn, keyColumn, messageColumn, tableName, basenameColumn, basename);
-        return template.query(query, extractor);
+                String.format(QUERY_SELECT_MESSAGES, languageColumn, countryColumn, variantColumn, keyColumn,
+                        messageColumn, tableName, basenameColumn);
+
+        return template.query(query, new Object[] { basename }, extractor);
     }
 
 
@@ -66,9 +73,8 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
         deleteMessages(basename);
 
         String query =
-                String.format("insert into `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)",
-                        tableName, basenameColumn, languageColumn, countryColumn, variantColumn, keyColumn,
-                        messageColumn);
+                String.format(QUERY_INSERT, tableName, basenameColumn, languageColumn, countryColumn, variantColumn,
+                        keyColumn, messageColumn);
 
         for (Locale locale : messages.getLocales()) {
 
@@ -109,9 +115,12 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     }
 
 
-    private void deleteMessages(String basename) {
+    private void deleteMessages(final String basename) {
 
-        template.execute(String.format("delete from `%s` where `%s` = '%s'", tableName, basenameColumn, basename));
+        String query = String.format(QUERY_DELETE, tableName, basenameColumn);
+
+        template.update(query, basename);
+
     }
 
 
@@ -301,8 +310,7 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     public List<String> getAvailableBaseNames() {
 
         List<String> basenames =
-                template.queryForList(String.format("select distinct `%s` from `%s`", basenameColumn, tableName),
-                        String.class);
+                template.queryForList(String.format(QUERY_SELECT_BASENAMES, basenameColumn, tableName), String.class);
         return basenames;
     }
 

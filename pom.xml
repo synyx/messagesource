@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.synyx</groupId>
 	<artifactId>messagesource</artifactId>
@@ -8,7 +7,7 @@
 		Implementation of Springs MessageSource interface that is able to load Messages at once from 
 		several sources like a Database (using JDBC).
 	</description>
-	<version>0.4-SNAPSHOT</version>
+	<version>0.5</version>
 	<url>http://messagesource.synyx.org/static</url>
 	
 	<organization>
@@ -45,9 +44,9 @@
 	</developers>
 
 	<scm>
-		<url>http://svn.synyx.org/synyx/opensource/messagesource/trunk</url>
-		<connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/trunk</connection>
-		<developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/trunk</developerConnection>
+		<url>http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.5</url>
+		<connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.5</connection>
+		<developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/tags/messagesource-0.5</developerConnection>
 	</scm>
 
 	<distributionManagement>

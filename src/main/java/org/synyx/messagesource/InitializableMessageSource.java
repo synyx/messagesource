@@ -57,7 +57,7 @@ public class InitializableMessageSource extends AbstractMessageSource implements
     /**
      * If this property is set to true this initializes post-construction (spring lifecycle interface)
      */
-    protected boolean initializeOnPostconstruct = true;
+    protected boolean autoInitialize = true;
 
     /**
      * Property that indicates if all basenames returned from the {@link MessageProvider} should be used (=false) or the
@@ -245,10 +245,21 @@ public class InitializableMessageSource extends AbstractMessageSource implements
      */
     public void afterPropertiesSet() throws Exception {
 
-        if (initializeOnPostconstruct) {
+        if (autoInitialize) {
             initialize();
         }
 
+    }
+
+
+    /**
+     * Sets the
+     * 
+     * @param autoInitialize
+     */
+    public void setAutoInitialize(boolean autoInitialize) {
+
+        this.autoInitialize = autoInitialize;
     }
 
 }

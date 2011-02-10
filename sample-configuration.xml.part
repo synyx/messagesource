@@ -8,4 +8,5 @@
 	
 	<bean id="jdbcMessageProvider" class="org.synyx.messagesource.jdbc.JdbcMessageProvider">
 		<property name="dataSource" ref="dataSource"/>
+		<property name="countryColumn" value="land" />
 	</bean>

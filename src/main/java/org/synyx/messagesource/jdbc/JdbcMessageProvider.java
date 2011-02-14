@@ -14,13 +14,26 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.util.Assert;
 import org.synyx.messagesource.MessageAcceptor;
 import org.synyx.messagesource.MessageProvider;
 import org.synyx.messagesource.Messages;
 import org.synyx.messagesource.util.LocaleUtils;
 
 
+/**
+ * {@link MessageProvider} implementation that reads messages out of a database. The table to be used as well as the
+ * names of the columns is configurable.
+ * 
+ * @author Marc Kannegießer - kannegiesser@synyx.de
+ */
 public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
+
+    private static final String QUERY_INSERT =
+            "INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String QUERY_DELETE = "DELETE FROM `%s` WHERE `%s` = ?";
+    private static final String QUERY_SELECT_BASENAMES = "SELECT DISTINCT `%s` from `%s`";
+    private static final String QUERY_SELECT_MESSAGES = "SELECT `%s`,`%s`,`%s`,`%s`,`%s` FROM `%s` WHERE %s = ?";
 
     private JdbcTemplate template;
 
@@ -35,12 +48,18 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     private final MessageExtractor extractor = new MessageExtractor();
 
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.synyx.messagesource.MessageProvider#getMessages(java.lang.String)
+     */
     public Messages getMessages(String basename) {
 
         String query =
-                String.format("select `%s`,`%s`,`%s`,`%s`,`%s` from `%s` where %s = '%s'", languageColumn,
-                        countryColumn, variantColumn, keyColumn, messageColumn, tableName, basenameColumn, basename);
-        return template.query(query, extractor);
+                String.format(QUERY_SELECT_MESSAGES, languageColumn, countryColumn, variantColumn, keyColumn,
+                        messageColumn, tableName, basenameColumn);
+
+        return template.query(query, new Object[] { basename }, extractor);
     }
 
 
@@ -54,28 +73,19 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
         deleteMessages(basename);
 
         String query =
-                String.format("insert into `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)",
-                        tableName, basenameColumn, languageColumn, countryColumn, variantColumn, keyColumn,
-                        messageColumn);
+                String.format(QUERY_INSERT, tableName, basenameColumn, languageColumn, countryColumn, variantColumn,
+                        keyColumn, messageColumn);
 
         for (Locale locale : messages.getLocales()) {
 
-            insert(query, basename, LocaleUtils.getLanguage(locale), LocaleUtils.getCountry(locale), LocaleUtils
-                    .getVariant(locale), messages.getMessages(locale));
+            insert(query, basename, LocaleUtils.getLanguage(locale), LocaleUtils.getCountry(locale),
+                    LocaleUtils.getVariant(locale), messages.getMessages(locale));
 
         }
 
     }
 
 
-    /**
-     * @param basename
-     * @param language
-     * @param country
-     * @param variant
-     * @param key
-     * @param message
-     */
     private void insert(String query, final String basename, final String language, final String country,
             final String variant, final Map<String, String> messages) {
 
@@ -105,89 +115,170 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     }
 
 
-    private void deleteMessages(String basename) {
+    private void deleteMessages(final String basename) {
 
-        template.execute(String.format("delete from `%s` where `%s` = '%s'", tableName, basenameColumn, basename));
+        String query = String.format(QUERY_DELETE, tableName, basenameColumn);
+
+        template.update(query, basename);
+
     }
 
 
+    /**
+     * Returns the name of the column holding the information about the language (string-type)
+     * 
+     * @return the name of the column holding the information about the language (string-type)
+     */
     public String getLanguageColumn() {
 
         return languageColumn;
     }
 
 
+    /**
+     * Sets the name of the column holding the information about the language (string-type)
+     * 
+     * @param languageColumn the name of the language-column
+     */
     public void setLanguageColumn(String languageColumn) {
+
+        Assert.notNull(languageColumn);
 
         this.languageColumn = languageColumn;
     }
 
 
+    /**
+     * Returns the name of the column holding the information about the country (string-type)
+     * 
+     * @return the name of the column holding the information about the country (string-type)
+     */
     public String getCountryColumn() {
 
         return countryColumn;
     }
 
 
+    /**
+     * Sets the name of the column holding the information about the country (string-type)
+     * 
+     * @param countryColumn the name of the country-column
+     */
     public void setCountryColumn(String countryColumn) {
+
+        Assert.notNull(countryColumn);
 
         this.countryColumn = countryColumn;
     }
 
 
+    /**
+     * Returns the name of the column holding the information about the variant (string-type)
+     * 
+     * @return the name of the column holding the information about the variant (string-type)
+     */
     public String getVariantColumn() {
 
         return variantColumn;
     }
 
 
+    /**
+     * Sets the name of the column holding the information about the variant (string-type)
+     * 
+     * @param variantColumn the name of the variant-column
+     */
     public void setVariantColumn(String variantColumn) {
 
+        Assert.notNull(variantColumn);
         this.variantColumn = variantColumn;
     }
 
 
+    /**
+     * Returns the name of the column holding the information about the key (string-type)
+     * 
+     * @return the name of the column holding the information about the key (string-type)
+     */
     public String getKeyColumn() {
 
         return keyColumn;
     }
 
 
+    /**
+     * Sets the name of the column holding the information about the key aka the name of the message-code (string-type)
+     * 
+     * @param keyColumn the name of the key-column
+     */
     public void setKeyColumn(String keyColumn) {
+
+        Assert.notNull(keyColumn);
 
         this.keyColumn = keyColumn;
     }
 
 
+    /**
+     * Returns the name of the column holding the information about the message (string-type)
+     * 
+     * @return the name of the column holding the information about the message (string-type)
+     */
     public String getMessageColumn() {
 
         return messageColumn;
     }
 
 
+    /**
+     * Sets the name of the column holding the information about the message-value aka the message itself (string-type)
+     * 
+     * @param messageColumn the name of the message-column
+     */
     public void setMessageColumn(String messageColumn) {
 
+        Assert.notNull(messageColumn);
         this.messageColumn = messageColumn;
     }
 
 
+    /**
+     * Returns the name of the table containing the messages
+     * 
+     * @return the name of the table containing the messages
+     */
     public String getTableName() {
 
         return tableName;
     }
 
 
+    /**
+     * Sets the name of the table containing the messages
+     * 
+     * @param tableName the name of the table containing the messages
+     */
     public void setTableName(String tableName) {
 
+        Assert.notNull(tableName);
         this.tableName = tableName;
     }
 
 
+    /**
+     * Sets the {@link DataSource} where connections can be created to the database containing the table with messages
+     * 
+     * @param dataSource the {@link DataSource} to set
+     */
     public void setDataSource(DataSource dataSource) {
 
+        Assert.notNull(dataSource);
         this.template = new JdbcTemplate(dataSource);
     }
 
+    /*
+     * Helper that extracts messages from a resultset
+     */
     class MessageExtractor implements ResultSetExtractor<Messages> {
 
         public Messages extractData(ResultSet rs) throws SQLException, DataAccessException {
@@ -219,8 +310,7 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     public List<String> getAvailableBaseNames() {
 
         List<String> basenames =
-                template.queryForList(String.format("select distinct `%s` from `%s`", basenameColumn, tableName),
-                        String.class);
+                template.queryForList(String.format(QUERY_SELECT_BASENAMES, basenameColumn, tableName), String.class);
         return basenames;
     }
 

@@ -36,7 +36,7 @@
 	<developers>
 		<developer>
 			<id>kannegiesser</id>
-			<name>Marc Kannegießer</name>
+			<name>Marc Kannegiesser</name>
 			<email>kannegiesser@synyx.de</email>
 			<roles>
 				<role>Project Lead</role>
@@ -166,6 +166,32 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>create-executable-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>
+									importer
+                                </descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>org.synyx.messagesource.util.ImporterRunner</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 
 
 		</plugins>

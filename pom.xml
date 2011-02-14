@@ -7,7 +7,7 @@
 		Implementation of Springs MessageSource interface that is able to load Messages at once from 
 		several sources like a Database (using JDBC).
 	</description>
-	<version>0.6</version>
+	<version>0.7-SNAPSHOT</version>
 	<url>http://messagesource.synyx.org/static</url>
 
 
@@ -45,9 +45,9 @@
 	</developers>
 
 	<scm>
-		<url>http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.6</url>
-		<connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.6</connection>
-		<developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/tags/messagesource-0.6</developerConnection>
+		<url>http://svn.synyx.org/synyx/opensource/messagesource/trunk</url>
+		<connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/trunk</connection>
+		<developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/trunk</developerConnection>
 	</scm>
 
 	<distributionManagement>

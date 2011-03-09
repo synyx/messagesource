@@ -16,11 +16,23 @@ import org.synyx.messagesource.util.LocaleUtils;
 
 
 /**
+ * Helper-Class that holds informations about a Bundle
+ * 
  * @author Marc Kannegiesser - kannegiesser@synyx.de
  */
 
 class BundleInfo {
 
+    Locale locale;
+    File file;
+
+
+    /**
+     * Creates a new instance
+     * 
+     * @param file
+     * @param basename
+     */
     public BundleInfo(File file, String basename) {
 
         this.file = file;
@@ -32,12 +44,13 @@ class BundleInfo {
         String localeString = fileName.substring(prefixLength, fileName.length() - postfixLength);
 
         locale = LocaleUtils.toLocale(localeString);
-        // TODO Auto-generated constructor stub
     }
 
 
     /**
-     * @return
+     * Returns a {@link Map} containing the messages for the given file
+     * 
+     * @return the messages for the given bundle
      */
     public Map<String, String> getMessages() {
 
@@ -57,6 +70,9 @@ class BundleInfo {
 
     /**
      * Loads {@link Properties} from the given {@link File} while handling errors.
+     * 
+     * @param file the file to load from
+     * @return the {@link Properties} loaded
      */
     private Properties loadProperties(File file) {
 
@@ -80,6 +96,4 @@ class BundleInfo {
 
     }
 
-    Locale locale;
-    File file;
 }

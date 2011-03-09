@@ -23,6 +23,8 @@ import org.synyx.messagesource.util.LocaleUtils;
 
 
 /**
+ * {@link MessageAcceptor} implementation that is able to write messages in a zip-compressed file or stream.
+ * 
  * @author Marc Kannegiesser - kannegiesser@synyx.de
  */
 public class ZipMessageAcceptor implements MessageAcceptor {

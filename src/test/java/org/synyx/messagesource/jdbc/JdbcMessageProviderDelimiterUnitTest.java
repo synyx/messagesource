@@ -6,10 +6,11 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 
-public class JdbcMessageProviderUnitTest {
+public class JdbcMessageProviderDelimiterUnitTest {
 
     private JdbcTemplate template;
     private JdbcMessageProvider provider;
@@ -38,34 +39,45 @@ public class JdbcMessageProviderUnitTest {
 
 
     @Test
-    public void testReturnsDefaultMessage() {
+    public void worksWithNoDelimiter() {
 
-        TestUtils.insertMessage(template, "foo", "bar");
-        TestUtils.assertMessage(provider, null, null, null, "foo", "bar");
+        provider.setDelimiter("");
+        testMessages();
+    }
 
+
+    @Test(expected = IllegalArgumentException.class)
+    public void failsWithNullDelimiter() {
+
+        provider.setDelimiter(null);
     }
 
 
     @Test
-    public void testReturnsLanguage() {
+    public void worksWithBackTickDelimiter() {
 
-        TestUtils.insertMessage(template, "de", "foo", "bar");
-        TestUtils.assertMessage(provider, "de", null, null, "foo", "bar");
-
+        provider.setDelimiter("`");
+        testMessages();
     }
 
 
     @Test
-    public void testReturnsLanguageCountry() {
+    public void worksWithSpaceDelimiter() {
 
-        TestUtils.insertMessage(template, "de", "DE", "foo", "bar");
-        TestUtils.assertMessage(provider, "de", "DE", null, "foo", "bar");
-
+        provider.setDelimiter(" ");
+        testMessages();
     }
 
 
-    @Test
-    public void testMoreMessages() {
+    @Test(expected = BadSqlGrammarException.class)
+    public void failsWithWrongDelimiter() {
+
+        provider.setDelimiter("'");
+        testMessages();
+    }
+
+
+    public void testMessages() {
 
         TestUtils.insertMessage(template, "de", "DE", "foo", "bar");
         TestUtils.insertMessage(template, "de", "DE", "key", "value");
@@ -82,29 +94,10 @@ public class JdbcMessageProviderUnitTest {
     }
 
 
-    @Test
-    public void testReturnsLanguageCountryVariant() {
-
-        TestUtils.insertMessage(template, "de", "DE", "X", "foo", "bar");
-        TestUtils.assertMessage(provider, "de", "DE", "X", "foo", "bar");
-
-    }
-
-
     @After
     public void after() {
 
         template.execute("DROP Table Message IF EXISTS");
     }
 
-
-    @Test
-    public void testSetup() {
-
-        TestUtils.insertMessage(template, "key", "message");
-        TestUtils.insertMessage(template, "de", "key", "message");
-        TestUtils.insertMessage(template, "de", "de", "key", "message");
-        TestUtils.insertMessage(template, "de", "de", "POSIX", "key", "message");
-
-    }
 }

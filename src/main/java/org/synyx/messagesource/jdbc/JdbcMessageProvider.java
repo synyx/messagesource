@@ -29,11 +29,10 @@ import org.synyx.messagesource.util.LocaleUtils;
  */
 public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
 
-    private static final String QUERY_INSERT =
-            "INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String QUERY_DELETE = "DELETE FROM `%s` WHERE `%s` = ?";
-    private static final String QUERY_SELECT_BASENAMES = "SELECT DISTINCT `%s` from `%s`";
-    private static final String QUERY_SELECT_MESSAGES = "SELECT `%s`,`%s`,`%s`,`%s`,`%s` FROM `%s` WHERE %s = ?";
+    private static final String QUERY_INSERT = "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String QUERY_DELETE = "DELETE FROM %s WHERE %s = ?";
+    private static final String QUERY_SELECT_BASENAMES = "SELECT DISTINCT %s from %s";
+    private static final String QUERY_SELECT_MESSAGES = "SELECT %s,%s,%s,%s,%s FROM %s WHERE %s = ?";
 
     private JdbcTemplate template;
 
@@ -44,6 +43,8 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     private String keyColumn = "key";
     private String messageColumn = "message";
     private String tableName = "Message";
+
+    private String delimiter = "`";
 
     private final MessageExtractor extractor = new MessageExtractor();
 
@@ -56,8 +57,9 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     public Messages getMessages(String basename) {
 
         String query =
-                String.format(QUERY_SELECT_MESSAGES, languageColumn, countryColumn, variantColumn, keyColumn,
-                        messageColumn, tableName, basenameColumn);
+                String.format(QUERY_SELECT_MESSAGES, addDelimiter(languageColumn), addDelimiter(countryColumn),
+                        addDelimiter(variantColumn), addDelimiter(keyColumn), addDelimiter(messageColumn),
+                        addDelimiter(tableName), addDelimiter(basenameColumn));
 
         return template.query(query, new Object[] { basename }, extractor);
     }
@@ -73,8 +75,9 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
         deleteMessages(basename);
 
         String query =
-                String.format(QUERY_INSERT, tableName, basenameColumn, languageColumn, countryColumn, variantColumn,
-                        keyColumn, messageColumn);
+                String.format(QUERY_INSERT, addDelimiter(tableName), addDelimiter(basenameColumn),
+                        addDelimiter(languageColumn), addDelimiter(countryColumn), addDelimiter(variantColumn),
+                        addDelimiter(keyColumn), addDelimiter(messageColumn));
 
         for (Locale locale : messages.getLocales()) {
 
@@ -117,7 +120,7 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
 
     private void deleteMessages(final String basename) {
 
-        String query = String.format(QUERY_DELETE, tableName, basenameColumn);
+        String query = String.format(QUERY_DELETE, addDelimiter(tableName), addDelimiter(basenameColumn));
 
         template.update(query, basename);
 
@@ -254,6 +257,28 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
 
 
     /**
+     * Returns the name of the column holding the information about the basename (string-type)
+     * 
+     * @return the name of the basename-column
+     */
+    public String getBasenameColumn() {
+
+        return basenameColumn;
+    }
+
+
+    /**
+     * Sets the name of the column holding the information about the basename (string-type)
+     * 
+     * @param basenameColumn the name of the basename-column
+     */
+    public void setBasenameColumn(String basenameColumn) {
+
+        this.basenameColumn = basenameColumn;
+    }
+
+
+    /**
      * Sets the name of the table containing the messages
      * 
      * @param tableName the name of the table containing the messages
@@ -302,6 +327,29 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     }
 
 
+    /**
+     * Returns the delimiter used within queries to delimit table- and column-names
+     * 
+     * @return the delimiter
+     */
+    public String getDelimiter() {
+
+        return delimiter;
+    }
+
+
+    /**
+     * Sets the delimiter used within queries to delimit table- and column-names (defaults to `). Must not be null.
+     * 
+     * @param delimiter the delimiter to use
+     */
+    public void setDelimiter(String delimiter) {
+
+        Assert.notNull(delimiter);
+        this.delimiter = delimiter;
+    }
+
+
     /*
      * (non-Javadoc)
      * 
@@ -310,8 +358,16 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     public List<String> getAvailableBaseNames() {
 
         List<String> basenames =
-                template.queryForList(String.format(QUERY_SELECT_BASENAMES, basenameColumn, tableName), String.class);
+                template.queryForList(
+                        String.format(QUERY_SELECT_BASENAMES, addDelimiter(basenameColumn), addDelimiter(tableName)),
+                        String.class);
         return basenames;
+    }
+
+
+    protected String addDelimiter(String name) {
+
+        return String.format("%s%s%s", delimiter, name, delimiter);
     }
 
 }

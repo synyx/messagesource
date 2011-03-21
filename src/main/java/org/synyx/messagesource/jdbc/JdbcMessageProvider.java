@@ -29,10 +29,11 @@ import org.synyx.messagesource.util.LocaleUtils;
  */
 public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
 
-    private static final String QUERY_INSERT = "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String QUERY_DELETE = "DELETE FROM %s WHERE %s = ?";
-    private static final String QUERY_SELECT_BASENAMES = "SELECT DISTINCT %s from %s";
-    private static final String QUERY_SELECT_MESSAGES = "SELECT %s,%s,%s,%s,%s FROM %s WHERE %s = ?";
+    protected static final String QUERY_INSERT_MESSAGE =
+            "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)";
+    protected static final String QUERY_DELETE_MESSAGES = "DELETE FROM %s WHERE %s = ?";
+    protected static final String QUERY_SELECT_BASENAMES = "SELECT DISTINCT %s from %s";
+    protected static final String QUERY_SELECT_MESSAGES = "SELECT %s,%s,%s,%s,%s FROM %s WHERE %s = ?";
 
     private JdbcTemplate template;
 
@@ -57,7 +58,7 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     public Messages getMessages(String basename) {
 
         String query =
-                String.format(QUERY_SELECT_MESSAGES, addDelimiter(languageColumn), addDelimiter(countryColumn),
+                String.format(getSelectMessagesQuery(), addDelimiter(languageColumn), addDelimiter(countryColumn),
                         addDelimiter(variantColumn), addDelimiter(keyColumn), addDelimiter(messageColumn),
                         addDelimiter(tableName), addDelimiter(basenameColumn));
 
@@ -75,7 +76,7 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
         deleteMessages(basename);
 
         String query =
-                String.format(QUERY_INSERT, addDelimiter(tableName), addDelimiter(basenameColumn),
+                String.format(getInsertMessageQuery(), addDelimiter(tableName), addDelimiter(basenameColumn),
                         addDelimiter(languageColumn), addDelimiter(countryColumn), addDelimiter(variantColumn),
                         addDelimiter(keyColumn), addDelimiter(messageColumn));
 
@@ -118,12 +119,163 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
     }
 
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.synyx.messagesource.MessageProvider#getAvailableBaseNames()
+     */
+    public List<String> getAvailableBaseNames() {
+
+        List<String> basenames =
+                template.queryForList(
+                        String.format(getSelectBasenamesQuery(), addDelimiter(basenameColumn), addDelimiter(tableName)),
+                        String.class);
+        return basenames;
+    }
+
+
     private void deleteMessages(final String basename) {
 
-        String query = String.format(QUERY_DELETE, addDelimiter(tableName), addDelimiter(basenameColumn));
+        String query = String.format(getDeleteMessagesQuery(), addDelimiter(tableName), addDelimiter(basenameColumn));
 
         template.update(query, basename);
 
+    }
+
+
+    /**
+     * Returns the query used to select messages of a basename
+     * 
+     * @return the query
+     */
+    protected String getSelectMessagesQuery() {
+
+        return QUERY_SELECT_MESSAGES;
+    }
+
+
+    /**
+     * Returns the query used for selecting available basenames.
+     * 
+     * @return the query
+     */
+    protected String getSelectBasenamesQuery() {
+
+        return QUERY_SELECT_BASENAMES;
+    }
+
+
+    /**
+     * Returns the Query-Template used to insert a Message
+     * 
+     * @return the query
+     */
+    protected String getInsertMessageQuery() {
+
+        return QUERY_INSERT_MESSAGE;
+    }
+
+
+    /**
+     * Returns the query to delete Messages
+     * 
+     * @return the query
+     */
+    protected String getDeleteMessagesQuery() {
+
+        return QUERY_DELETE_MESSAGES;
+    }
+
+
+    /**
+     * Method that "wraps" a field-name (or table-name) into the delimiter.
+     * 
+     * @param name the name of the field/table
+     * @return the wrapped field/table
+     */
+    protected String addDelimiter(String name) {
+
+        return String.format("%s%s%s", delimiter, name, delimiter);
+    }
+
+
+    /**
+     * Returns the delimiter used within queries to delimit table- and column-names
+     * 
+     * @return the delimiter
+     */
+    public String getDelimiter() {
+
+        return delimiter;
+    }
+
+
+    /**
+     * Sets the delimiter used within queries to delimit table- and column-names (defaults to `). Must not be null.
+     * 
+     * @param delimiter the delimiter to use
+     */
+    public void setDelimiter(String delimiter) {
+
+        Assert.notNull(delimiter);
+        this.delimiter = delimiter;
+    }
+
+
+    /**
+     * Returns the name of the column holding the information about the basename (string-type)
+     * 
+     * @return the name of the basename-column
+     */
+    public String getBasenameColumn() {
+
+        return basenameColumn;
+    }
+
+
+    /**
+     * Sets the name of the column holding the information about the basename (string-type)
+     * 
+     * @param basenameColumn the name of the basename-column
+     */
+    public void setBasenameColumn(String basenameColumn) {
+
+        this.basenameColumn = basenameColumn;
+    }
+
+
+    /**
+     * Returns the name of the table containing the messages
+     * 
+     * @return the name of the table containing the messages
+     */
+    public String getTableName() {
+
+        return tableName;
+    }
+
+
+    /**
+     * Sets the name of the table containing the messages
+     * 
+     * @param tableName the name of the table containing the messages
+     */
+    public void setTableName(String tableName) {
+
+        Assert.notNull(tableName);
+        this.tableName = tableName;
+    }
+
+
+    /**
+     * Sets the {@link DataSource} where connections can be created to the database containing the table with messages
+     * 
+     * @param dataSource the {@link DataSource} to set
+     */
+    public void setDataSource(DataSource dataSource) {
+
+        Assert.notNull(dataSource);
+        this.template = new JdbcTemplate(dataSource);
     }
 
 
@@ -244,68 +396,16 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
         this.messageColumn = messageColumn;
     }
 
-
     /**
-     * Returns the name of the table containing the messages
-     * 
-     * @return the name of the table containing the messages
-     */
-    public String getTableName() {
-
-        return tableName;
-    }
-
-
-    /**
-     * Returns the name of the column holding the information about the basename (string-type)
-     * 
-     * @return the name of the basename-column
-     */
-    public String getBasenameColumn() {
-
-        return basenameColumn;
-    }
-
-
-    /**
-     * Sets the name of the column holding the information about the basename (string-type)
-     * 
-     * @param basenameColumn the name of the basename-column
-     */
-    public void setBasenameColumn(String basenameColumn) {
-
-        this.basenameColumn = basenameColumn;
-    }
-
-
-    /**
-     * Sets the name of the table containing the messages
-     * 
-     * @param tableName the name of the table containing the messages
-     */
-    public void setTableName(String tableName) {
-
-        Assert.notNull(tableName);
-        this.tableName = tableName;
-    }
-
-
-    /**
-     * Sets the {@link DataSource} where connections can be created to the database containing the table with messages
-     * 
-     * @param dataSource the {@link DataSource} to set
-     */
-    public void setDataSource(DataSource dataSource) {
-
-        Assert.notNull(dataSource);
-        this.template = new JdbcTemplate(dataSource);
-    }
-
-    /*
      * Helper that extracts messages from a resultset
-     */
+     **/
     class MessageExtractor implements ResultSetExtractor<Messages> {
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see org.springframework.jdbc.core.ResultSetExtractor#extractData(java.sql.ResultSet)
+         */
         public Messages extractData(ResultSet rs) throws SQLException, DataAccessException {
 
             Messages messages = new Messages();
@@ -324,50 +424,6 @@ public class JdbcMessageProvider implements MessageProvider, MessageAcceptor {
             return messages;
         }
 
-    }
-
-
-    /**
-     * Returns the delimiter used within queries to delimit table- and column-names
-     * 
-     * @return the delimiter
-     */
-    public String getDelimiter() {
-
-        return delimiter;
-    }
-
-
-    /**
-     * Sets the delimiter used within queries to delimit table- and column-names (defaults to `). Must not be null.
-     * 
-     * @param delimiter the delimiter to use
-     */
-    public void setDelimiter(String delimiter) {
-
-        Assert.notNull(delimiter);
-        this.delimiter = delimiter;
-    }
-
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.synyx.messagesource.MessageProvider#getAvailableBaseNames()
-     */
-    public List<String> getAvailableBaseNames() {
-
-        List<String> basenames =
-                template.queryForList(
-                        String.format(QUERY_SELECT_BASENAMES, addDelimiter(basenameColumn), addDelimiter(tableName)),
-                        String.class);
-        return basenames;
-    }
-
-
-    protected String addDelimiter(String name) {
-
-        return String.format("%s%s%s", delimiter, name, delimiter);
     }
 
 }

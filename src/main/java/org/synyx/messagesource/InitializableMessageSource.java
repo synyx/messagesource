@@ -158,11 +158,11 @@ public class InitializableMessageSource extends AbstractMessageSource implements
                     String language = LocaleUtils.getLanguage(loc);
                     String country = LocaleUtils.getCountry(loc);
                     String variant = LocaleUtils.getVariant(loc);
-                    if (!variant.isEmpty()) {
+                    if (variant.length() > 0) {
                         path.add(String.format("_%s_%s_%s", language, country, variant));
-                    } else if (!country.isEmpty()) {
+                    } else if (country.length() > 0) {
                         path.add(String.format("_%s_%s", language, country));
-                    } else if (!language.isEmpty()) {
+                    } else if (language.length() > 0) {
                         path.add(String.format("_%s", language));
                     }
                 }

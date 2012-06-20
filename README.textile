@@ -1,0 +1,231 @@
+h1. Synyx Messagesource for Spring
+
+This project brings an implementation of Springs @MessageSource@ interface, which is responsible for resolving texts in an internationalised manner. See the
+"Spring Reference":http://static.springsource.org/spring/docs/3.0.5.RELEASE/spring-framework-reference/htmlsingle/spring-framework-reference.html#context-functionality-messagesource for more details about Springs i18n mechanism. 
+
+
+Spring currently ships with two implementations of @MessageSource@. While @StaticMessageSource@ is very simple and intended for testing-purposes, @ResourceBundleMessageSource@ is a layer above JAVAs @ResourceBundle@  and is mainly used for resolving messages from resource-files like @messages_en.properties@.
+ 
+This project brings another implementation which allows to persist your internationalisation in a RDBMS accessed by JDBC. We think, storing messages in the Database can help you to with several problems:
+
+* Let the user of an application change its translations "on the fly" using the application itself
+* Reload messages without Classloading-Issues
+* less Encoding-Mess
+
+h1. Getting Started
+
+For those who want to give the project a quick try without learning much about how it works, this section might help.
+
+h2. Dependencies (Maven)
+
+Include the messagesource-artifact in your Maven build (@pom.xml@):
+
+<pre class="code"><code class="xml">
+<dependencies>
+  [...]
+    <dependency>
+        <groupId>org.synyx</groupId>
+        <artifactId>messagesource</artifactId>
+        <version>0.6.1</version>
+    </dependency>
+</dependencies>
+</code>
+</pre>
+
+Since the artifact is currently only available from Synyx' public repositories you have to include this in your POM as well:
+
+<pre class="code"><code class="xml">
+<repositories>
+    [...]
+    <repository>
+        <id>nexus.synyx.org</id>
+        <name>Synyx OpenSource Repository</name>
+        <url>http://repo.synyx.org</url>
+    </repository>
+</repositories>
+</code>
+</pre>
+
+h2. Integration
+
+Now that your project has the dependency you can integrate it within your applications bean-definition file (maybe @applicationContext.xml@ or whatever).
+Spring searches for a bean named @messageSource@ within your context and uses this to resolve its messages. So, instead using a classic @RessourceBundleMessageSource@ backed by a set of @.properties@ files you define the following which is the minimal configuration of a @MessageSource@ that reads its data from the database:
+
+<pre class="code"><code class="xml">
+<bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+    <property name="messageProvider">
+        <bean class="org.synyx.messagesource.jdbc.JdbcMessageProvider">
+            <property name="dataSource" ref="dataSource"/>
+        </bean>
+    </property>
+</bean>
+</code>
+</pre>
+
+In addition, you need a bean named @dataSource@ within the context, implementing the @javax.sql.DataSource@ interface. But you'll probably have one of those anyway. If your @DataSource@-Bean has a different name simply adjust it in the @ref@ attribute above.
+
+
+Both beans we define here have a set of properties for additional configuration which are not completely mentioned here for the sake of simplicity. But we will go into more detail in the following sections.
+
+
+h1. Database
+
+For the above configuration the database where your @DataSource@ leads to is expected to have a table containing the messages named *Messages* and the following colums:
+
+* a column named *language* containing the language-code the message is for 
+* a column named *country* containing the country-code the message is for
+* a column named *variant* containing the variant-code the message is for
+* a column named *basename* containing the basename (can be seen as a cateogry) the message is for
+* a column named *key* containing the key-code of the message
+* a column named *message* containing the message itself, including "usual" patterns for placeholders ({0} etc)
+
+All columns must be String-Types (e.g. VARCHAR for mySQL) and may be empty.
+
+The name of the table as well of the columns can be configured using @<property name="languageColumn" value="sprache"/>@ on @JdbcMessageProvider@. Replace language with country, variant, key, message, basename accordingly and use the tableName property to change the table. 
+
+From version *0.6.1* on you may also set the delimiter used to delimit the names of columns and the table using @<property name="delimiter" value="`"/>@ to fit your databases needs. If your database supports this its ok to set this to an empty string or whatever.
+
+To create such a table in your database you could use a statement like the following:
+
+<pre class="code"><code class="sql">
+CREATE TABLE `Message` (
+    `basename` VARCHAR( 31 ) NOT NULL ,
+    `language` VARCHAR( 7 ) NULL ,
+    `country` VARCHAR( 7 ) NULL ,
+    `variant` VARCHAR( 7 ) NULL ,
+    `key` VARCHAR( 255 ) NULL ,
+    `message` TEXT NULL
+);
+</code>
+</pre>
+
+If you insert messages into the table, you must set a basename. All the other fields may be empty or null (because null is treated in a special manner in databases you might want to use an empty String for "not set"). If you want to insert a global defaultmessage for a given basename simply leave language, country and variant empty. If you want to insert an english message, just set the language-column to "en" and leave country and variant empty. tbc.
+
+Please note that the values within the columns language, country and variant correspond directly to the values in @java.util.Locale@ which means they should match the correct ISO-Codes. See @Locale@s API-Doc for details.
+
+h1. Diggin' deeper
+
+h2. InitializableMessageSource
+
+The @InitializableMessagesource@ kind of works like springs regular @ResourceBundleMessageSource@ (which delegates to @ResourceBundle@) except that it loads all the messages at once using a @MessageProvider@.
+
+An @InitializableMessagesource@ can be responsible for 1 or more basenames which can be seen as "message-categories". One of these basenames would be equal to to a set of @.properties@ files with the same basename (matching the pattern basename_language_country_variant.properties) when you'd use @ResourceBundleMessageSource@. With @InitializableMessagesource@ messages are categorized the same way but "stored" however the configured @MessageProvider@ wants to (e.g. in Database for @JDBCMessageProvider@).
+
+h3. Initialisation
+
+As mentioned before, @InitializableMessagesource@ loads all its messages at certain points. This is every time its @initialize()@ method is called. If you do not configure it otherwise and use Spring to create your @MessageSource@ this is also at construction-time. Afterwards you may inject the @InitializableMessagesource@ into your components and call @initialize()@ again at any time. 
+
+If you do not want the @MessageSource@ to be initialized on construction-time you may set the @autoInitialize@-property to false:
+
+<pre class="code"><code class="xml">
+<bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+    <property name="autoInitialize" value="false" />
+    [...]
+</bean>
+</code>
+</pre>
+
+Each time @initialize()@ is called, the @InitializableMessagesource@ asks its @MessageProvider@ for all the messages it has (for the configured basenames). These messages are cached until @initialize()@ is called the next time.
+
+h3. Messageprovider
+
+@InitializableMessagesource@ uses a @MessageProvider@ to load its messages. The project currently ships two implementations of this interface. Of course, you can implement your own one too and set it @InitializableMessageSource@ using its @messageProvider@-property.
+
+<pre class="code"><code class="xml">
+<bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+    <property name="messageProvider"> <bean class="org.synyx.MySpecialMessageProvider"/> </property>
+    [...]
+</bean>
+</code>
+</pre>
+
+The two implementations provided are @FileSystemMessageProvider@ and @JdbcMessageProvider@. 
+
+@JdbcMessageProvider@ looks up messages from a table in a given database (see above for configuration options, mainly the names of the table and the columns).
+
+@FileSystemMessageProvider@ behaves kind of like the known @ResourceBundleMessageSource@, except that its aware of all @.properties@ files in a directory. You configure it by giving it a @File@ or @String@ leading to the directory where it looks for files with the patern *.properties while being aware of the "locale-postfixes" within the filename. Using this alone will probably not solve any bigger problems for you, but it is very useful when it comes to importing messages from a @.properties@ file into the database and vice-versa.
+
+h3. Basenames
+
+By default, @InitializableMessageSource@ first asks its @MessageProvider@ for all available basenames and then requests the messages for each basename returned.
+You may limit this by using the @basename@ or @basenames@ properties. If you want the @MessageSource@ to be responsible only for a single basename, use the basename property. 
+
+<pre class="code"><code class="xml">
+<bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+    <property name="basename">messages</property>
+    [...]
+</bean>
+</code>
+</pre>
+
+If you want to limit it to more than one basename, use basenames. 
+
+<pre class="code"><code class="xml">
+<bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+    <property name="basename">
+        <list>
+             <value>messages</value>
+             <value>special</value>
+        </list>
+    </property>
+    [...]
+</bean>
+</code>
+</pre>
+
+As mentioned, if you neither set the basename nor the basenames properties, the @InitializableMessageSource@ simply resolves messages for all the basenames available from the @MessageProvider@, which is usually a good way to start. In this case you are able to add new categories (basenames) on the fly by simply inserting corresponding rows into the database.
+
+h3. Message Resolving
+
+@InitializableMessagesource@ resolves its messages the same way @ResourceBundle@ does.
+
+When resolving a message the keys are tried to resolve in the following order:
+
+* given Locales language + country + variant
+* given Locales language + country
+* given Locales language
+* default Locales language + country + variant (property defaultLocale, if not null)
+* default Locales language + country (property defaultLocale, if not null)
+* default Locales language (property defaultLocale, if not null)
+* Global Default (basename)
+
+As you can see, there is (like in @ResourceBundle@) a defaultLocale involved. Unlike with @ResourceBundle@ this is not the Systems default but one you may set explicitly using the @defaultLocale@-property of @InitializableMessagesource@. If you do not set it (or set it to @null@) the @MessageSource@ falls back to the global default for the basename skipping the default-steps mentioned above.
+
+<pre class="code"><code class="xml">
+<bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+    <property name="defaultLocale" value="en_US" />
+    [...]
+</bean>
+</code>
+</pre>
+
+h1. Importing Messages
+
+If you want to import an existing set of @ResourceBundle@ files you might want to give the @Importer@ a try. @JdbcMessageProvider@ and @FileSystemMessageProvider@ also implement a second interface: @MessageAcceptor@ which can be used to set messages (Save them to the filesystem or database). 
+
+Example:
+
+<pre>
+<code class="java">
+
+MessageProvider source = filesystemMessageProvider;
+MessageAcceptor target = jdbcMessageProvider;
+
+Importer importer = new Importer(source, target);
+
+// imports messages of all basenames from source to target
+importer.importMessages(); 
+
+// or just import some basenames?
+Collection<String> basenames = source.getAvailableBaseNames();
+for (String basename : basenames) {
+    if (decideIfImport(basename)) {
+        importer.importMessages(basename);
+    }
+}
+</code>
+</pre>
+
+The same way this works for importing from filesystem to database you may also "export" from database to filesystem by switching source and target.
+If you prefer to get your @.properties@ files zipped you may use the @ZipMessageAcceptor@ which writes the files zip-compressed to an @OutputStream@ or @File@. Reading @.properties@ files from @ZipMessageAcceptor@ is currently not supported (@ZipMessageAcceptor@ only implements the @MessageAcceptor@ interface, not the @MessageProvider@).
+

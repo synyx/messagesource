@@ -21,6 +21,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<springVersion>3.0.5.RELEASE</springVersion>
 		<junit.version>4.6</junit.version>
+   
+    <jenkins.job.reporters.email>kannegiesser@synyx.de</jenkins.job.reporters.email>  
+    <jenkins.maven.name>Maven3</jenkins.maven.name>
+    <jenkins.jdk.name>Java6</jenkins.jdk.name>
+		<jenkins.job.git.userRemoteConfigs.1.url>https://github.com/synyx/messagesource.git</jenkins.job.git.userRemoteConfigs.1.url>
+
 	</properties>
 
 	<licenses>
@@ -45,9 +51,9 @@
 	</developers>
 
 	<scm>
-    <url>scm:git:git://github.com/synyx/minos.git</url>
-    <connection>scm:git:git://github.com/synyx/minos.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/synyx/minos.git</developerConnection>
+    <url>scm:git:git://github.com/synyx/messagesource.git</url>
+    <connection>scm:git:git://github.com/synyx/messagesource.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/synyx/messagesource.git</developerConnection>
 	</scm>
 
 	<distributionManagement>
@@ -70,10 +76,6 @@
 		<url>http://redmine.synyx.org/projects/messagesource/</url>
 	</issueManagement>
 
-	<ciManagement>
-		<system>Hudson</system>
-		<url>http://ci.synyx.org/job/messagesource/</url>
-	</ciManagement>
 
 
 	<dependencies>
@@ -140,6 +142,28 @@
 	<build>
 		<plugins>
 
+           <plugin>
+               <groupId>org.synyx.maven.plugins</groupId>
+               <artifactId>jenkins-maven-plugin</artifactId>
+               <version>1.0.0</version>
+               <configuration>
+                   <jobTypes>build</jobTypes>
+                   <types>build</types>
+                   <names>build</names>
+                   <failOnError>true</failOnError>
+                   <template>classpath:org/synyx/jenkins/jobs/template.xml</template>
+                   <propertiesBase>classpath:org/synyx/jenkins/jobs/properties/</propertiesBase>
+                   <url>http://jenkins-vm:8080/</url>
+                   <majorVersion>trunk</majorVersion>
+               </configuration>
+               <dependencies>
+                   <dependency>
+                       <groupId>org.synyx.jenkins</groupId>
+                       <artifactId>jenkins-config</artifactId>
+                       <version>0.4</version>
+                   </dependency>
+               </dependencies>
+           </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -242,4 +266,18 @@
 		</repository>
 
 	</repositories>
+
+  <pluginRepositories>
+     <pluginRepository>
+       <id>nexus.synyx.de</id>
+       <name>Synyx OpenSource Repository</name>
+       <url>http://repo.synyx.org</url>
+     </pluginRepository>
+     <pluginRepository>
+       <id>maven.jenkins-ci.org</id>
+       <name>Jenkins Repo</name>
+       <url>http://kuali-nexus-lb-287160402.us-east-1.elb.amazonaws.com/content/groups/public/</url>
+     </pluginRepository>
+   </pluginRepositories>
+
 </project>

@@ -5,6 +5,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.util.Assert;
 import org.synyx.messagesource.util.LocaleUtils;
+import org.synyx.messagesource.util.MessageInitializationException;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -89,13 +90,21 @@ public class InitializableMessageSource extends AbstractMessageSource implements
         initializeMessages(basename);
     }
 
-    protected  void initializeMessages(String basename) {
+    protected void initializeMessages(String basename) throws RuntimeException {
 
         Messages messagesForBasename = messageProvider.getMessages(basename);
+
         for (Locale locale : messagesForBasename.getLocales()) {
             Map<String, String> codeToMessage = messagesForBasename.getMessages(locale);
+
             for (String code : codeToMessage.keySet()) {
-                addMessage(basename, locale, code, createMessageFormat(codeToMessage.get(code), locale));
+                try {
+                    addMessage(basename, locale, code, createMessageFormat(codeToMessage.get(code), locale));
+                } catch (RuntimeException e) {
+                    throw new MessageInitializationException(String.format(
+                            "Error processing Message code=%s locale=%s basename=%s, %s", code, locale, basename,
+                            e.getMessage()), e);
+                }
             }
         }
     }
@@ -105,6 +114,7 @@ public class InitializableMessageSource extends AbstractMessageSource implements
 
         String localeString = basename + "_" + (locale != null ? locale.toString() : "");
         Map<String, MessageFormat> codeMap = messages.get(localeString);
+
         if (codeMap == null) {
             codeMap = new HashMap<String, MessageFormat>();
             messages.put(localeString, codeMap);

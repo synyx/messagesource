@@ -139,6 +139,9 @@ public class InitializableMessageSource extends AbstractMessageSource implements
                 if (formatMap != null) {
                     MessageFormat format = formatMap.get(code);
                     if (format != null) {
+                    	if(format.getLocale()==null){
+                            format.setLocale(defaultLocale);
+                          }
                         return format;
                     }
                 }

@@ -103,6 +103,20 @@ If you insert messages into the table, you must set a basename. All the other fi
 
 Please note that the values within the columns language, country and variant correspond directly to the values in @java.util.Locale@ which means they should match the correct ISO-Codes. See @Locale@s API-Doc for details.
 
+h2. Speedup message import 
+
+    Messages are pushed into Database as Batch inserts. <br><b>Current performance test results : 30000 messages   are inserted in 5 seconds with the following configuration.</b> <br>
+ You only need to add "rewriteBatchedStatements" parameter to database url to achive this throughput.<br/>
+  <b>Test enviorment</b><br>	
+
+	Mysql version- 5.1.65<br>
+	Driver/Connector- mysql-connector-java-5.1.15.jar<br>
+	<b>Note-</b> Add following “&rewriteBatchedStatements=true” parameter  to your jdbc.url
+    <br><b>Sample-</b><br>
+    Before Replacing - jdbc.url=jdbc:mysql://<host>/<db>?useUnicode=true&characterEncoding=utf8
+    After Replacing -  jdbc.url=jdbc:mysql://<host>/<db>?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true
+	
+
 h1. Diggin' deeper
 
 h2. InitializableMessageSource
@@ -174,6 +188,30 @@ If you want to limit it to more than one basename, use basenames.
 </pre>
 
 As mentioned, if you neither set the basename nor the basenames properties, the @InitializableMessageSource@ simply resolves messages for all the basenames available from the @MessageProvider@, which is usually a good way to start. In this case you are able to add new categories (basenames) on the fly by simply inserting corresponding rows into the database.
+
+h3. Configure as per your requirement
+    
+    Following configurations provides extra flexibility to control UI level behaviour<br>
+    Sample spring configuration<br>
+
+   <pre class="code"><code class="xml">   
+    <bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
+     <property name="messageProvider" ref="messageProvider"/>
+     <property name="returnUnresolvedCode" value="true"/></b>
+     <property name="defaultLocale" value="en"/>
+    </bean>
+
+  <bean name="messageProvider" class="org.synyx.messagesource.jdbc.JdbcMessageProvider">
+       <property name="dataSource" ref="dataSource"/>
+  </bean>
+</code>
+ </pre>
+   
+ <b>returnUnresolvedCode</b>-If set true returns message code (key), if no message could be resolved  for this code.  Helps avoiding null pointer exception at UI level.
+
+<b>defaultLocale</b>- This locale will be explicitly set for the message, if the message is resolved  from a base name without locale(usually default basename file).This parameter helps avoid null pointer exception for the messages with arguments. <br>Example-  test.message= hi{0}, welcome back.
+<spring:message code="test.message" arguments="test user"/>  will give error if the message is resolved from the basename file without locale specied in it name.
+
 
 h3. Message Resolving
 

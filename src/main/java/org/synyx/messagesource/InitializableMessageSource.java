@@ -37,6 +37,7 @@ import java.util.*;
  * from the {@link MessageProvider} are used.</p>
  *
  * @author  Marc Kannegiesser - kannegiesser@synyx.de
+ * @auther  Amit Pal Saluja - amitpal.saluja@citrix.com
  */
 public class InitializableMessageSource extends AbstractMessageSource implements InitializingBean {
 

@@ -49,6 +49,16 @@
 			</roles>
 		</developer>
 	</developers>
+    <contributors>
+        <contributor>
+            <name>Amit Pal Saluja</name>
+            <email>amitpal.saluja@citrix.com</email>
+            <organization>Citrix</organization>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+    </contributors>
 
 	<scm>
     <url>scm:git:git://github.com/synyx/messagesource.git</url>

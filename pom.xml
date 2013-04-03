@@ -4,8 +4,26 @@
   <artifactId>messagesource</artifactId>
   <name>MessageSource Support</name>
   <version>0.1</version>
-  
-     
+  <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <description>
+        Implementation of Springs MessageSource interface that is able to load Messages at once from
+        several sources like a Database (using JDBC).
+    </description>
+
+    <organization>
+        <name>synyx GmbH &amp; Co. KG</name>
+        <url>http://www.synyx.org</url>
+    </organization>
+
+    <inceptionYear>2010</inceptionYear>
+
     <licenses>
         <license>
             <name>Apache 2</name>
@@ -26,17 +44,6 @@
             </roles>
         </developer>
     </developers>
-
-    <distributionManagement>
-        <repository>
-            <id>releases.public.nexus.synyx.de</id>
-            <url>http://nexus.synyx.de/content/repositories/public-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots.public.nexus.synyx.de</id>
-            <url>http://nexus.synyx.de/content/repositories/public-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <scm>
         <url>scm:git:https://github.com/synyx/messagesource.git</url>
@@ -122,21 +129,6 @@
                 </configuration>
             </plugin>
             
-            
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.0.4</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
@@ -167,24 +159,5 @@
             </plugin>
         </plugins>
     </reporting>
-    
-    <repositories>
-        
-        <repository>
-            <id>nexus.synyx.org</id>
-            <name>Synyx OpenSource Repository</name>
-            <url>http://repo.synyx.org</url>
-        </repository>
-        
-        <repository>
-            <id>maven-repository.dev.java.net</id>
-            <name>Java Dev Net Repository</name>
-            <url>http://download.java.net/maven/2</url>
-        </repository>
 
-    </repositories>
-    
-   
-
-  
 </project>

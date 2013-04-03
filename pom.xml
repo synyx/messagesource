@@ -39,9 +39,9 @@
     </distributionManagement>
 
     <scm>
-        <url>http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.1</url>
-        <connection>scm:svn:http://svn.synyx.org/synyx/opensource/messagesource/tags/messagesource-0.1</connection>
-        <developerConnection>scm:svn:https://svn.synyx.de/svn/synyx/opensource/messagesource/tags/messagesource-0.1</developerConnection>
+        <url>scm:git:https://github.com/synyx/messagesource.git</url>
+        <connection>scm:git:https://github.com/synyx/messagesource.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/synyx/messagesource.git</developerConnection>
     </scm>
 
  

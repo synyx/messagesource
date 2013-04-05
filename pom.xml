@@ -158,6 +158,7 @@
 				<configuration>
 					<!-- We don't want to accidentally push tags from "failed" releases -->
 					<pushChanges>false</pushChanges>
+					<localCheckout>true</localCheckout>
 				</configuration>
 			</plugin>
 

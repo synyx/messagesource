@@ -1,32 +1,37 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.synyx</groupId>
 	<artifactId>messagesource</artifactId>
-	<name>Synyx Messagesource for Spring</name>
+	<name>synyx Messagesource for Spring</name>
+	<version>0.7-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+
 	<description>
-		Implementation of Springs MessageSource interface that is able to load Messages at once from 
+		Implementation of Springs MessageSource interface that is able to load Messages at once from
 		several sources like a Database (using JDBC).
 	</description>
-	<version>0.7</version>
-	<url>http://messagesource.synyx.org/static</url>
 
+	<url>http://synyx.github.com/messagesource</url>
 
 	<organization>
-		<name>Synyx GmbH &amp; Co. KG</name>
+		<name>synyx GmbH &amp; Co. KG</name>
 		<url>http://www.synyx.org</url>
 	</organization>
+
 	<inceptionYear>2010</inceptionYear>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<springVersion>3.0.5.RELEASE</springVersion>
+		<spring.version>3.0.5.RELEASE</spring.version>
 		<junit.version>4.6</junit.version>
-   
-    <jenkins.job.reporters.email>kannegiesser@synyx.de</jenkins.job.reporters.email>  
-    <jenkins.maven.name>Maven3</jenkins.maven.name>
-    <jenkins.jdk.name>Java6</jenkins.jdk.name>
-		<jenkins.job.git.userRemoteConfigs.1.url>https://github.com/synyx/messagesource.git</jenkins.job.git.userRemoteConfigs.1.url>
-
 	</properties>
 
 	<licenses>
@@ -41,7 +46,7 @@
 	<developers>
 		<developer>
 			<id>kannegiesser</id>
-			<name>Marc Kannegiesser</name>
+			<name>Marc Kannegießer</name>
 			<email>kannegiesser@synyx.de</email>
 			<roles>
 				<role>Project Lead</role>
@@ -51,9 +56,10 @@
 	</developers>
 
 	<scm>
-    <url>scm:git:git://github.com/synyx/messagesource.git</url>
-    <connection>scm:git:git://github.com/synyx/messagesource.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/synyx/messagesource.git</developerConnection>
+		<url>scm:git:https://github.com/synyx/messagesource.git</url>
+		<connection>scm:git:https://github.com/synyx/messagesource.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/synyx/messagesource.git</developerConnection>
+		<tag>HEAD</tag>
 	</scm>
 
 	<distributionManagement>
@@ -61,44 +67,38 @@
 			<id>static.synyx.org</id>
 			<url>scp://static.synyx.org/home/public/public_html/messagesource/site</url>
 		</site>
-		<repository>
-			<id>releases.public.nexus.synyx.de</id>
-			<url>http://nexus.synyx.de/content/repositories/public-releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>snapshots.public.nexus.synyx.de</id>
-			<url>http://nexus.synyx.de/content/repositories/public-snapshots</url>
-		</snapshotRepository>
 	</distributionManagement>
 
 	<issueManagement>
-		<system>Redmine</system>
-		<url>http://redmine.synyx.org/projects/messagesource/</url>
+		<system>Github Issues</system>
+		<url>http://github.com/synyx/messagesource/issues</url>
 	</issueManagement>
 
-
+	<ciManagement>
+		<system>Travis CI</system>
+		<url>http://travis-ci.org/#!/synyx/messagesource</url>
+	</ciManagement>
 
 	<dependencies>
 
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.jdbc</artifactId>
-			<version>${springVersion}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.context.support</artifactId>
-			<version>${springVersion}</version>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.beans</artifactId>
-			<version>${springVersion}</version>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -106,10 +106,7 @@
 			<version>1.1</version>
 		</dependency>
 
-
-
-		<!-- test-scoped dependencies from here -->
-
+		<!--  Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -123,7 +120,8 @@
 			<version>1.8.2</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- h2db and commons dbcp for integration testing -->
+
+		<!--  h2db -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -142,28 +140,6 @@
 	<build>
 		<plugins>
 
-           <plugin>
-               <groupId>org.synyx.maven.plugins</groupId>
-               <artifactId>jenkins-maven-plugin</artifactId>
-               <version>1.0.0</version>
-               <configuration>
-                   <jobTypes>build</jobTypes>
-                   <types>build</types>
-                   <names>build</names>
-                   <failOnError>true</failOnError>
-                   <template>classpath:org/synyx/jenkins/jobs/template.xml</template>
-                   <propertiesBase>classpath:org/synyx/jenkins/jobs/properties/</propertiesBase>
-                   <url>http://jenkins-vm:8080/</url>
-                   <majorVersion>trunk</majorVersion>
-               </configuration>
-               <dependencies>
-                   <dependency>
-                       <groupId>org.synyx.jenkins</groupId>
-                       <artifactId>jenkins-config</artifactId>
-                       <version>0.4</version>
-                   </dependency>
-               </dependencies>
-           </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -175,49 +151,40 @@
 				</configuration>
 			</plugin>
 
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.0.4</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<!-- We don't want to accidentally push tags from "failed" releases -->
+					<pushChanges>false</pushChanges>
+					<localCheckout>true</localCheckout>
+				</configuration>
 			</plugin>
 		</plugins>
 
 	</build>
 
-
 	<reporting>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jxr-maven-plugin</artifactId>
-			</plugin>
-
-
-
 			<!-- Metrics plugins -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jdepend-maven-plugin</artifactId>
+				<version>2.0-beta-2</version>
 			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>javancss-maven-plugin</artifactId>
+				<version>2.0</version>
 			</plugin>
 
 			<!-- Code checks -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
+				<version>2.7.1</version>
 				<configuration>
 					<targetJdk>1.5</targetJdk>
 				</configuration>
@@ -226,20 +193,24 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>taglist-maven-plugin</artifactId>
+				<version>2.4</version>
 			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.5.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>2.5.2</version>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
 				<configuration>
 					<links>
 						<link>http://java.sun.com/javase/6/docs/api/</link>
@@ -251,33 +222,5 @@
 
 		</plugins>
 	</reporting>
-
-	<repositories>
-		<repository>
-			<id>nexus.synyx.org</id>
-			<name>Synyx OpenSource Repository</name>
-			<url>http://repo.synyx.org</url>
-		</repository>
-
-		<repository>
-			<id>spring-maven-release</id>
-			<name>Spring Maven Release Repository</name>
-			<url>http://repository.springsource.com/maven/bundles/release</url>
-		</repository>
-
-	</repositories>
-
-  <pluginRepositories>
-     <pluginRepository>
-       <id>nexus.synyx.de</id>
-       <name>Synyx OpenSource Repository</name>
-       <url>http://repo.synyx.org</url>
-     </pluginRepository>
-     <pluginRepository>
-       <id>maven.jenkins-ci.org</id>
-       <name>Jenkins Repo</name>
-       <url>http://kuali-nexus-lb-287160402.us-east-1.elb.amazonaws.com/content/groups/public/</url>
-     </pluginRepository>
-   </pluginRepositories>
 
 </project>

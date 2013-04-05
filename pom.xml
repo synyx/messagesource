@@ -3,7 +3,7 @@
 	<groupId>org.synyx</groupId>
 	<artifactId>messagesource</artifactId>
 	<name>synyx Messagesource for Spring</name>
-	<version>0.6</version>
+	<version>0.6.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<parent>
@@ -58,7 +58,7 @@
 		<url>scm:git:https://github.com/synyx/messagesource.git</url>
 		<connection>scm:git:https://github.com/synyx/messagesource.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/synyx/messagesource.git</developerConnection>
-		<tag>messagesource-0.6-central</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<distributionManagement>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd version="4.3" timestamp="2013-04-06T15:22:14.014">
+<file name="/Users/krupicka/Projects/Synyx/Opensource/messagesource/src/main/java/org/synyx/messagesource/filesystem/BundleInfo.java">
+<violation beginline="104" endline="106" begincolumn="19" endcolumn="17" rule="EmptyCatchBlock" ruleset="Basic Rules" package="org.synyx.messagesource.filesystem" class="BundleInfo" method="loadProperties" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyCatchBlock" priority="3">
+Avoid empty catch blocks
+</violation>
+</file>
+<file name="/Users/krupicka/Projects/Synyx/Opensource/messagesource/src/main/java/org/synyx/messagesource/filesystem/FileSystemMessageProvider.java">
+<violation beginline="183" endline="185" begincolumn="23" endcolumn="21" rule="EmptyCatchBlock" ruleset="Basic Rules" package="org.synyx.messagesource.filesystem" class="FileSystemMessageProvider" method="setMessages" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyCatchBlock" priority="3">
+Avoid empty catch blocks
+</violation>
+</file>
+<file name="/Users/krupicka/Projects/Synyx/Opensource/messagesource/src/main/java/org/synyx/messagesource/filesystem/ZipMessageAcceptor.java">
+<violation beginline="105" endline="107" begincolumn="11" endcolumn="9" rule="EmptyCatchBlock" ruleset="Basic Rules" package="org.synyx.messagesource.filesystem" class="ZipMessageAcceptor" method="finish" externalInfoUrl="http://pmd.sourceforge.net/rules/basic.html#EmptyCatchBlock" priority="3">
+Avoid empty catch blocks
+</violation>
+</file>
+</pmd>

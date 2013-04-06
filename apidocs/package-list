@@ -1,0 +1,5 @@
+org.synyx.messagesource
+org.synyx.messagesource.filesystem
+org.synyx.messagesource.importer
+org.synyx.messagesource.jdbc
+org.synyx.messagesource.util

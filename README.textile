@@ -166,7 +166,7 @@ You may limit this by using the @basename@ or @basenames@ properties. If you wan
 
 <pre class="code"><code class="xml">
 <bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
-    <property name="basename">messages</property>
+    <property name="basenames">messages</property>
     [...]
 </bean>
 </code>
@@ -176,7 +176,7 @@ If you want to limit it to more than one basename, use basenames.
 
 <pre class="code"><code class="xml">
 <bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
-    <property name="basename">
+    <property name="basenames">
         <list>
              <value>messages</value>
              <value>special</value>
@@ -194,18 +194,13 @@ h3. Configure as per your requirement
     Following configurations provides extra flexibility to control UI level behaviour<br>
     Sample spring configuration<br>
 
-   <pre class="code"><code class="xml">   
     <bean id="messageSource" class="org.synyx.messagesource.InitializableMessageSource">
      <property name="messageProvider" ref="messageProvider"/>
      <property name="returnUnresolvedCode" value="true"/></b>
      <property name="defaultLocale" value="en"/>
     </bean>
-
-  <bean name="messageProvider" class="org.synyx.messagesource.jdbc.JdbcMessageProvider">
-       <property name="dataSource" ref="dataSource"/>
-  </bean>
-</code>
- </pre>
+    <bean name="messageProvider" class="org.synyx.messagesource.jdbc.JdbcMessageProvider">
+       <property name="dataSource" ref="dataSource"/>    </bean>
    
  <b>returnUnresolvedCode</b>-If set true returns message code (key), if no message could be resolved  for this code.  Helps avoiding null pointer exception at UI level.
 
@@ -245,7 +240,8 @@ Example:
 
 <pre>
 <code class="java">
-
+@Autowired
+private JdbcMessageProvider jdbcMessageProvider;
 MessageProvider source = filesystemMessageProvider;
 MessageAcceptor target = jdbcMessageProvider;
 

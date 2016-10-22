@@ -100,7 +100,7 @@ public class InitializableMessageSource extends AbstractMessageSource implements
 
             for (String code : codeToMessage.keySet()) {
                 try {
-                    addMessage(basename, locale, code, createMessageFormat(codeToMessage.get(code), locale));
+                    addMessage(basename, locale, code, createMessageFormat(codeToMessage.get(code).replace("'","''"), locale));
                 } catch (RuntimeException e) {
                     throw new MessageInitializationException(String.format(
                             "Error processing Message code=%s locale=%s basename=%s, %s", code, locale, basename,

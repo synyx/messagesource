@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,10 +93,8 @@ public class ImporterUnitTest {
             Properties p = new Properties();
             p.setProperty("key", "value");
 
-            tempfile = File.createTempFile("messagesourcetext", null);
+            tempfile = Files.createTempDirectory("messagesourcetext").toFile();
             if (tempfile.exists()) {
-                tempfile.delete();
-                tempfile.mkdir();
             }
 
             file = new File(tempfile, basename + ".properties");
